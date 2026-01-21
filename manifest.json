@@ -1,0 +1,19 @@
+{
+  "manifest_version": 3,
+  "name": "MSPA Translator",
+  "version": "0.1",
+
+  "description": "Apply translations to MSPA To Go mirrors",
+
+  "icons": {
+    "32": "icon.svg",
+    "64": "icon.svg"
+  },
+
+  "content_scripts": [
+    {
+      "matches": ["*://mspa.chadthundercock.com/*", "*://mspa.roberd.me/*"],
+      "js": ["translate_mspa.js"]
+    }
+  ]
+}
