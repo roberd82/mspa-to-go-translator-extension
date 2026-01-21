@@ -1,17 +1,9 @@
-// link to lang_info.json, needs to make changeable from extension settings
-var lang_info_url = "https://gitea.roberd.me/forditasok/mspa-magyarul/raw/branch/main/lang_info.json";
-// for offline testing, comment out before commit
-/*var lang_info = JSON.parse(`{
-	"lang": "Magyar",
-	"code": "hu",
-	"assets_dir_url": "https://gitea.roberd.me/forditasok/mspa-magyarul/raw/branch/main/HS_HU/Assets/",
-	"data_dir_url": "https://gitea.roberd.me/forditasok/mspa-magyarul/raw/branch/main/HS_HU/huData/",
-	"data_files": {
-		"translation_MSPA": "MSPA_HU.json"
-	}
-}`);*/
+const getting = browser.storage.sync.get("translation_link");
+getting.then(doThings, onError);
 
-(async () => {
+async function doThings(item) {
+	const lang_info_url = item['translation_link'];
+
 	// get lang_info, comment this out when offline testing
 	const lang_info = await getJson(lang_info_url)
 	// urls to translation data
@@ -24,7 +16,7 @@ var lang_info_url = "https://gitea.roberd.me/forditasok/mspa-magyarul/raw/branch
 	const mspa_data = await getJson(translation_MSPA_url);
 
 	document.getElementById('title').innerHTML = mspa_data[pageNum]['title'];
-	//only standard gifs for now
+	// only standard gifs for now
 	const imgs = document.getElementById("media").getElementsByTagName("img");
 	var srcs = [];
 	for (let i = 0; i < imgs.length; i++) {
@@ -36,14 +28,19 @@ var lang_info_url = "https://gitea.roberd.me/forditasok/mspa-magyarul/raw/branch
 	}
 
 	document.getElementsByClassName("comic-text").item(0).innerHTML = mspa_data[pageNum]['content']/*.replaceAll("|PESTERLOG|", "")*/;
-	//only works if using mspa page numbers
+	// only works if using mspa page numbers
 	const commands = document.getElementsByClassName("command");
 	for (let i = 0; i < commands.length; i++) {
 		var href = commands[i].firstElementChild.getAttribute("href").split("/");
 		commands[i].firstElementChild.innerHTML = mspa_data[href[href.length-1]]['title'];
 	}
-})()
+  
+}
+
+function onError(error) {
+  console.log(`Error: ${error}`);
+}
 
 async function getJson(url) {
-		return await (await fetch(url)).json();
+	return await (await fetch(url)).json();
 }

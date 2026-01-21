@@ -1,19 +1,37 @@
 {
-  "manifest_version": 3,
-  "name": "MSPA Translator",
-  "version": "0.1",
+	"manifest_version": 3,
+	"name": "MSPA Translator",
+	"version": "0.1",
 
-  "description": "Apply translations to MSPA To Go mirrors",
+	"description": "Apply translations to MSPA To Go mirrors",
 
-  "icons": {
-    "32": "icon.svg",
-    "64": "icon.svg"
-  },
+	"homepage_url": "https://gitea.roberd.me/forditasok/mspa-to-go-translation-extension",
 
-  "content_scripts": [
-    {
-      "matches": ["*://mspa.chadthundercock.com/*", "*://mspa.roberd.me/*"],
-      "js": ["translate_mspa.js"]
-    }
-  ]
+	"icons": {
+		"32": "icon.svg",
+		"48": "icon.svg",
+		"64": "icon.svg",
+		"96": "icon.svg"
+	},
+
+	"action": {
+		"default_icon": "icon.svg",
+		"default_title": "MSPA Translator",
+		"default_popup": "popup.html"
+	},
+
+	"content_scripts": [
+		{
+			"matches": ["*://mspa.chadthundercock.com/*", "*://mspa.roberd.me/*"],
+			"js": ["translate_mspa.js"]
+		}
+	],
+
+	"permissions": ["storage"],
+
+	"browser_specific_settings": {
+		"gecko": {
+			"id": "@mspa-translator.roberd82"
+		}
+	}
 }
