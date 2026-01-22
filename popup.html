@@ -5,10 +5,38 @@
 	</head>
 	<body>
 		<form>
-			<label>Translation link: <input type="text" id="translation_link" name="translation_link" /></label>
-			<button type="submit">Save</button>
+			<label>
+				Link to translation's <code>lang_info.json</code> file:
+				<br>
+				<input type="text" id="translation_link" name="translation_link" />
+			</label>
+			<br>
+			<button type="submit" style="margin: 5px;">Save</button>
 		</form>
 
+		<style>
+			body {
+				background-color: #c6c6c6;
+				text-align: center;
+			}
+			form {
+				background-color: #efefef;
+			}
+			label {
+				font-family: 'Courier New', Courier, monospace;
+				user-select: none;
+			}
+			code {
+				background: rgba(0,0,0,0.25);
+				border-radius: 5px;
+				padding: 2px;
+				user-select: text;
+			}
+			input {
+				margin: 5px;
+				min-width: 75%;
+			}
+		</style>
 		<script src="popup.js"></script>
 	</body>
 </html>
