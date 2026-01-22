@@ -32,6 +32,7 @@
 	"browser_specific_settings": {
 		"gecko": {
 			"id": "@mspa-translator.roberd82"
-		}
+		},
+		"gecko_android": {}
 	}
 }
