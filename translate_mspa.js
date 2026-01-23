@@ -34,18 +34,15 @@ async function doThings(item) {
 
 		const flashes = medias[i].getElementsByTagName("ruffle-embed");
 		if (flashes.length > 0) {
-			const newFlashes = [];
-			var srcs = [];
 			for (let j = 0; j < flashes.length; j++) {
-				srcs.push(flashes[j].getAttribute("src").substring(6));
-				const newSrc = lang_info['assets_dir_url'] + srcs[j];
+				const newSrc = lang_info['assets_dir_url'] + flashes[j].getAttribute("src").substring(6);
 				// check if exists
 				fetch(newSrc, { method: 'HEAD' })
 				.then(response => {
 					if (response.ok) {
-						newFlashes.push(flashes[j].cloneNode(true));
-						newFlashes[j].setAttribute("src", newSrc);
-						flashes[j].replaceWith(newFlashes[j]);
+						const newFlash = flashes[j].cloneNode(true);
+						newFlash.setAttribute("src", newSrc);
+						flashes[j].replaceWith(newFlash);
 					}
 				})
 				.catch(() => {
@@ -56,6 +53,7 @@ async function doThings(item) {
 	}
 
 	const texts = document.getElementsByClassName("comic-text");
+	var allTextSrcs = [];
 	for (let i = 0; i < texts.length; i++) {
 		texts[i].innerHTML = mspa_data[getNextPageNum(pageNum, i)]['content']/*.replaceAll("|PESTERLOG|", "")*/;
 
@@ -90,8 +88,10 @@ async function doThings(item) {
 				links[i].href = lang_info['external_links'][split[split.length-1]];
 			}
 		}
+		// todo: redirect scraps, storyfiles the same way as media to check if exists
 
 		const imgs =  texts[i].getElementsByTagName("img");
+		var srcs = [];
 		for (let j = 0; j < imgs.length; j++) {
 			// first redirect mspaintadventures.com to /mspa
 			if (imgs[j].getAttribute("src").includes("http://www.mspaintadventures.com/")) {
@@ -99,8 +99,16 @@ async function doThings(item) {
 			} else if (imgs[j].getAttribute("src").includes("http://mspaintadventures.com/")) {
 				imgs[j].setAttribute("src", imgs[j].getAttribute("src").replaceAll("http://mspaintadventures.com/", "/mspa/"));
 			}
-			// todo: try to load scraps, storyfiles the same way as media to check if exists
+
+			if (imgs[j].getAttribute("src").includes("/mspa/")) {
+				srcs.push(imgs[j].getAttribute("src").substring(6));
+				imgs[j].src = lang_info['assets_dir_url'] + srcs[j];
+				imgs[j].onerror = function() {
+					imgs[j].src = "/mspa/" + allTextSrcs[i][j];
+				}
+			}
 		}
+		allTextSrcs.push(srcs);
 	}
 
 	// only works if using mspa page numbers
