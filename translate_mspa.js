@@ -5,6 +5,7 @@ async function doThings(item) {
 	// maybe should disable the option for homestuck.com page numbering and get the current page from url instead
 	const pageNum = document.getElementById('content').dataset.p;
 	// todo: do something on specific page here
+
 	// load in translation data files
 	const mspa_data = await getJson(lang_info['data_dir_url'] + lang_info['data_files']['translation_MSPA']);
 	
@@ -14,7 +15,7 @@ async function doThings(item) {
 	for (let i = 0; i < titles.length; i++) {
 		titles[i].innerHTML = mspa_data[getNextPageNum(pageNum, i)]['title'];		
 	}
-	// only gifs for now, flashes almost work, openbound I don't even know where to begin
+	// gifs and flashes, openbound remains
 	const medias = document.querySelectorAll("[id='media']");
 	var allSrcs = [];
 	for (let i = 0; i < medias.length; i++) {
@@ -30,20 +31,28 @@ async function doThings(item) {
 			}
 		}
 		allSrcs.push(srcs);
-		// I tried :c
-		/*const flashes = medias[i].getElementsByTagName("ruffle-embed");
+
+		const flashes = medias[i].getElementsByTagName("ruffle-embed");
 		if (flashes.length > 0) {
+			const newFlashes = [];
 			var srcs = [];
 			for (let j = 0; j < flashes.length; j++) {
 				srcs.push(flashes[j].getAttribute("src").substring(6));
 				const newSrc = lang_info['assets_dir_url'] + srcs[j];
-				flashes[j].setAttribute("src", newSrc);
-				//flashes[j].setAttribute("name", newSrc.substring(0, newSrc.length-4));
-				flashes[j].onerror = function() {
-					flashes[j].setAttribute("src", "/mspa/" + srcs[j]);
-				}
+				// check if exists
+				fetch(newSrc, { method: 'HEAD' })
+				.then(response => {
+					if (response.ok) {
+						newFlashes.push(flashes[j].cloneNode(true));
+						newFlashes[j].setAttribute("src", newSrc);
+						flashes[j].replaceWith(newFlashes[j]);
+					}
+				})
+				.catch(() => {
+					// do nothing
+				});
 			}
-		}*/
+		}
 	}
 
 	const texts = document.getElementsByClassName("comic-text");
