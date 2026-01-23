@@ -1,19 +1,12 @@
 browser.storage.sync.get("translation_link").then(doThings, onError);
-
+// everything is in this function, since if we don't have a translation link we can't do anything anyway
 async function doThings(item) {
-	const lang_info_url = item['translation_link'] || "https://gitea.roberd.me/forditasok/mspa-magyarul/raw/branch/main/lang_info.json";
-
-	const lang_info = await getJson(lang_info_url);
-	// urls to translation data
-	const translation_MSPA_url = lang_info['data_dir_url'] + lang_info['data_files']['translation_MSPA'];
-
-	// root url to assets tree
-	const translated_assets_url = lang_info['assets_dir_url'];
-	// load in translation data files
-	const mspa_data = await getJson(translation_MSPA_url);
-
+	const lang_info = await getJson(item['translation_link'] || "https://gitea.roberd.me/forditasok/mspa-magyarul/raw/branch/main/lang_info.json");
 	// maybe should disable the option for homestuck.com page numbering and get the current page from url instead
 	const pageNum = document.getElementById('content').dataset.p;
+	// todo: do something on specific page here
+	// load in translation data files
+	const mspa_data = await getJson(lang_info['data_dir_url'] + lang_info['data_files']['translation_MSPA']);
 	
 	document.title = mspa_data[pageNum]['title'] + " - MSPA To Go";
 	// all these loops are needed because of Act 6 Act 5 Act 1 x2
@@ -30,7 +23,7 @@ async function doThings(item) {
 		if (imgs.length > 0) {
 			for (let j = 0; j < imgs.length; j++) {
 				srcs.push(imgs[j].getAttribute("src").substring(6));
-				imgs[j].src = translated_assets_url + srcs[j];
+				imgs[j].src = lang_info['assets_dir_url'] + srcs[j];
 				imgs[j].onerror = function() {
 					imgs[j].src = "/mspa/" + allSrcs[i][j];
 				}
@@ -43,7 +36,7 @@ async function doThings(item) {
 			var srcs = [];
 			for (let j = 0; j < flashes.length; j++) {
 				srcs.push(flashes[j].getAttribute("src").substring(6));
-				const newSrc = translated_assets_url + srcs[j];
+				const newSrc = lang_info['assets_dir_url'] + srcs[j];
 				flashes[j].setAttribute("src", newSrc);
 				//flashes[j].setAttribute("name", newSrc.substring(0, newSrc.length-4));
 				flashes[j].onerror = function() {
@@ -106,12 +99,25 @@ async function doThings(item) {
 	for (let i = 0; i < commandses.length; i++) {
 		const commands = commandses[i].getElementsByClassName("command");
 		for (let j = 0; j < commands.length; j++) {
-			var href = commands[j].firstElementChild.getAttribute("href").split("/");
-			if (href.length > 1) {
-				commands[j].firstElementChild.innerHTML = mspa_data[href[href.length-1]]['title'];
+			const split = commands[j].firstElementChild.getAttribute("href").split("/");
+			if (split.length > 0) {
+				commands[j].firstElementChild.innerHTML = mspa_data[split[split.length-1]]['title'];
 			}
 		}
 	}
+
+	// footnotes
+	/*const footnotes = [];
+	for (let i = 0; i < lang_info['footnote_files'].length; i++) {
+		document.getElementById("page-outer").appendChild(document.createElement('br'));
+		const footnote = document.createElement('div');
+		footnote.textContent = "test";
+		footnote.id = "page";
+		footnote.className = "comic-text";
+
+		footnotes.push(lang_info['data_dir_url'] + lang_info['footnote_files'][i]);
+		document.getElementById("page-outer").appendChild(footnote);
+	}*/
 }
 
 function onError(error) {
