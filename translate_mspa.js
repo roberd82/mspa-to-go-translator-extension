@@ -3,7 +3,7 @@ browser.storage.sync.get("translation_link").then(doThings, onError);
 async function doThings(item) {
 	const lang_info_url = item['translation_link'] || "https://gitea.roberd.me/forditasok/mspa-magyarul/raw/branch/main/lang_info.json";
 
-	const lang_info = await getJson(lang_info_url)
+	const lang_info = await getJson(lang_info_url);
 	// urls to translation data
 	const translation_MSPA_url = lang_info['data_dir_url'] + lang_info['data_files']['translation_MSPA'];
 
@@ -15,7 +15,7 @@ async function doThings(item) {
 	// maybe should disable the option for homestuck.com page numbering and get the current page from url instead
 	const pageNum = document.getElementById('content').dataset.p;
 	
-	document.title = mspa_data[pageNum]['title'] + " - MSPA To Go"
+	document.title = mspa_data[pageNum]['title'] + " - MSPA To Go";
 	// all these loops are needed because of Act 6 Act 5 Act 1 x2
 	const titles = document.querySelectorAll("[id='title']");
 	for (let i = 0; i < titles.length; i++) {
@@ -23,7 +23,7 @@ async function doThings(item) {
 	}
 	// only gifs for now, flashes almost work, openbound I don't even know where to begin
 	const medias = document.querySelectorAll("[id='media']");
-	var allSrcs = []
+	var allSrcs = [];
 	for (let i = 0; i < medias.length; i++) {
 		const imgs = medias[i].getElementsByTagName("img");
 		var srcs = [];
@@ -56,6 +56,49 @@ async function doThings(item) {
 	const texts = document.getElementsByClassName("comic-text");
 	for (let i = 0; i < texts.length; i++) {
 		texts[i].innerHTML = mspa_data[getNextPageNum(pageNum, i)]['content']/*.replaceAll("|PESTERLOG|", "")*/;
+
+		const links = texts[i].getElementsByTagName("a");
+		for (let j = 0; j < links.length; j++) {
+			if (links[j].getAttribute("href").includes("http://www.mspaintadventures.com/")) {
+				links[j].setAttribute("href", links[j].getAttribute("href").replaceAll("http://www.mspaintadventures.com/", "/mspa/"));
+			} else if (links[j].getAttribute("href").includes("http://mspaintadventures.com/")) {
+				links[j].setAttribute("href", links[j].getAttribute("href").replaceAll("http://mspaintadventures.com/", "/mspa/"));
+			}
+			// sbahj links
+			if (links[j].getAttribute("href").includes("/mspa/sweetbroandhellajeff/")) {
+				links[j].setAttribute("href", links[j].getAttribute("href").replaceAll("/mspa/sweetbroandhellajeff/", "/sbahj"));
+				if (links[j].getAttribute("href").includes("comoc.php")) {
+					links[j].setAttribute("href", links[j].getAttribute("href").replaceAll("comoc.php", ""));
+				}
+				if (links[j].getAttribute("href").includes("?cid=")) {
+					links[j].setAttribute("href", links[j].getAttribute("href").replaceAll("?cid=", "/"));
+				}
+			}
+			// comic links
+			if (links[j].getAttribute("href").includes("/mspa/?s=")) {
+				links[j].setAttribute("href", links[j].getAttribute("href").replaceAll("/mspa/?s=", "/read/"));
+				if (links[j].getAttribute("href").includes("&p=")) {
+					links[j].setAttribute("href", links[j].getAttribute("href").replaceAll("&p=", "/"));
+				}
+			}
+
+			// external links
+			if (links[i].getAttribute("href").includes("/archive/external/")) {
+				const split = links[i].getAttribute("href").split("/archive/external/");
+				links[i].href = lang_info['external_links'][split[split.length-1]];
+			}
+		}
+
+		const imgs =  texts[i].getElementsByTagName("img");
+		for (let j = 0; j < imgs.length; j++) {
+			// first redirect mspaintadventures.com to /mspa
+			if (imgs[j].getAttribute("src").includes("http://www.mspaintadventures.com/")) {
+				imgs[j].setAttribute("src", imgs[j].getAttribute("src").replaceAll("http://www.mspaintadventures.com/", "/mspa/"));
+			} else if (imgs[j].getAttribute("src").includes("http://mspaintadventures.com/")) {
+				imgs[j].setAttribute("src", imgs[j].getAttribute("src").replaceAll("http://mspaintadventures.com/", "/mspa/"));
+			}
+			// todo: try to load scraps, storyfiles the same way as media to check if exists
+		}
 	}
 
 	// only works if using mspa page numbers
