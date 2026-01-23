@@ -100,24 +100,45 @@ async function doThings(item) {
 		const commands = commandses[i].getElementsByClassName("command");
 		for (let j = 0; j < commands.length; j++) {
 			const split = commands[j].firstElementChild.getAttribute("href").split("/");
-			if (split.length > 0) {
+			if (split.length > 1) {
 				commands[j].firstElementChild.innerHTML = mspa_data[split[split.length-1]]['title'];
 			}
 		}
 	}
 
 	// footnotes
-	/*const footnotes = [];
-	for (let i = 0; i < lang_info['footnote_files'].length; i++) {
-		document.getElementById("page-outer").appendChild(document.createElement('br'));
-		const footnote = document.createElement('div');
-		footnote.textContent = "test";
-		footnote.id = "page";
-		footnote.className = "comic-text";
+	for (let k = 0; k < document.querySelectorAll("[id='page']").length; k++) {		// this loop is needed for Act 6 Act 5 Act 1 x2
+		for (let i = 0; i < lang_info['footnote_files'].length; i++) {
+			const footnote = await getJson(lang_info['data_dir_url'] + lang_info['footnote_files'][i]);
+			if (typeof footnote[getNextPageNum(pageNum, k)] != 'undefined') {
+				for (let j = 0; j < footnote[getNextPageNum(pageNum, k)].length; j++) {
+					const note = document.createElement("div");
+					note.innerHTML = footnote[getNextPageNum(pageNum, k)][j]['content'];
+					note.id = "content";
+					note.className = "comic-text";
 
-		footnotes.push(lang_info['data_dir_url'] + lang_info['footnote_files'][i]);
-		document.getElementById("page-outer").appendChild(footnote);
-	}*/
+					if (footnote[getNextPageNum(pageNum, k)][j]['author'] != 'undefined') {
+						const author = document.createElement("span");
+						author.innerHTML = footnote[getNextPageNum(pageNum, k)][j]['author'];
+						author.setAttribute("style", "font-weight: 300;font-size: 10px;font-family: Verdana,Arial,Helvetica,sans-serif;display: flex;justify-content: flex-end;position: relative;top: 12px;margin-top: -12px;color: #979797;");
+						// style from uhc
+						note.appendChild(author);
+					}
+
+					const fotnoteContent = document.createElement("div");
+					fotnoteContent.id = "page";
+
+					const footnoteOuter = document.createElement("div");
+					footnoteOuter.id = "page-outer";
+
+					fotnoteContent.appendChild(note);
+					footnoteOuter.appendChild(fotnoteContent);
+
+					document.getElementById("footer").parentNode.insertBefore(footnoteOuter, document.getElementById("footer"));
+				}
+			}
+		}
+	}
 }
 
 function onError(error) {
