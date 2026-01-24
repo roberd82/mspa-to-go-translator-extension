@@ -1,6 +1,13 @@
-forceMspaNumbering();
+// spawncamp message box
+if (document.getElementById("message-viz-links") != null) {
+	if (!document.getElementById("message-viz-links").checked) {
+		document.getElementById("message-viz-links").click();
+	}
+	document.getElementById("message-viz-links").disabled = true;
+	document.getElementById("message-box-dismiss").click();
+}
 
-redirectToFirstPages();
+redirectPage();
 
 browser.storage.sync.get("translation_link").then(doThings, onError);
 // everything is in this function, since if we don't have a translation link we can't do anything anyway
@@ -18,59 +25,12 @@ async function doThings(item) {
 	}
 	// override page if defined in "replace_pages"
 	if (replacePage > -1) {
-		const newHtml = await fetch(lang_info['replace_pages_url'] + lang_info['replace_pages'][replacePage] + "/index.html");
-		document.documentElement.innerHTML = await newHtml.text();
-		reloadAllScripts();
-		if (lang_info['replace_pages'][replacePage] == "/options") {
-			forceMspaNumbering();
-		}
-	} else if (window.location.pathname.includes("/sbahj")) {	// sbahj
-		const imgs = document.getElementsByTagName("img");
-		var srcs = [];
-		for (let i = 0; i < imgs.length; i++) {
-			if (imgs[i].getAttribute("src").includes("/assets/img/sbahj/")) {
-				srcs.push(imgs[i].getAttribute("src"));
-				imgs[i].src = lang_info['assets_dir_url'] + srcs[i].replace("/assets/img/sbahj/", "sweetbroandhellajeff/");
-				imgs[i].onerror = function() {
-					imgs[i].src = srcs[i];
-				}
-			} else {
-				srcs.push(imgs[i].getAttribute("src").substring(6));
-				imgs[i].src = lang_info['assets_dir_url'] + srcs[i];
-				imgs[i].onerror = function() {
-					imgs[i].src = "/mspa/" + srcs[i];
-				}
-			}
-		}
-		const sbahj_comic_list = await getJson(lang_info['data_dir_url'] + lang_info['data_files']['sbahj_comic_list']);
-		const comic_list_links = document.getElementById("comic-list").getElementsByTagName("a");
-		for (let i = 0; i < comic_list_links.length; i++) {
-			for (let j = 0; j < sbahj_comic_list['listedPages'].length; j++) {
-				if (comic_list_links[i].getAttribute("href") == sbahj_comic_list['listedPages'][j]['url']) {
-					comic_list_links[i].innerHTML = sbahj_comic_list['listedPages'][j]['title'];
-					break;
-				}
-			}
-		}
-	} else if (window.location.pathname.includes("/log")) {	// log pages
-		if (window.location.pathname.includes("/log/")) {	// so it doesn't throw an error on /log
-			const mspa_data = await getJson(lang_info['data_dir_url'] + lang_info['data_files']['translation_MSPA']);
-			const links = document.getElementById("content").getElementsByTagName("a");
-			for (let i = 1; i < links.length; i++) {
-				const split = links[i].getAttribute("href").split("/");
-				links[i].innerHTML = mspa_data[split[split.length-1]]['title'];
-			}
-		}
-	} else if (window.location.pathname.includes("/map")) {
-		const imgs = document.getElementsByTagName("img");
-		var srcs = [];
-		for (let i = 0; i < imgs.length; i++) {
-			srcs.push(imgs[i].getAttribute("src").substring(6));
-			imgs[i].src = lang_info['assets_dir_url'] + srcs[i];
-			imgs[i].onerror = function() {
-				imgs[i].src = "/mspa/" + srcs[i];
-			
-			}
+		try {
+			const newHtml = await fetch(lang_info['replace_pages_url'] + lang_info['replace_pages'][replacePage] + "/index.html");
+			document.documentElement.innerHTML = await newHtml.text();
+			reloadAllScripts();
+		} catch (error) {
+			console.error("Page markd for override, but no there is no file.");
 		}
 	} else {	// replace comic content
 		// get page number from current url
@@ -82,10 +42,10 @@ async function doThings(item) {
 
 		// replace gifs and flashes (and openbound someday)
 		const medias = document.querySelectorAll("[id='media']");
-		var allSrcs = [];
+		let allSrcs = [];
 		for (let i = 0; i < medias.length; i++) {
 			const imgs = medias[i].getElementsByTagName("img");
-			var srcs = [];
+			let srcs = [];
 			if (imgs.length > 0) {
 				for (let j = 0; j < imgs.length; j++) {
 					srcs.push(imgs[j].getAttribute("src").substring(6));
@@ -139,13 +99,13 @@ async function doThings(item) {
 
 		// replace text and fix imported images and links
 		const texts = document.getElementsByClassName("comic-text");
-		var allTextSrcs = [];
-		var allTextHrefs = [];
+		let allTextSrcs = [];
+		let allTextHrefs = [];
 		for (let i = 0; i < texts.length; i++) {
 			texts[i].innerHTML = mspa_data[getNextPageNum(pageNum, i)]['content']/*.replaceAll("|PESTERLOG|", "")*/;
 
 			const links = texts[i].getElementsByTagName("a");
-			var hrefs = [];
+			let hrefs = [];
 			for (let j = 0; j < links.length; j++) {
 				if (links[j].getAttribute("href").includes("http://www.mspaintadventures.com/")) {
 					links[j].setAttribute("href", links[j].getAttribute("href").replaceAll("http://www.mspaintadventures.com/", "/mspa/"));
@@ -191,7 +151,7 @@ async function doThings(item) {
 			allTextHrefs.push(hrefs);
 
 			const imgs =  texts[i].getElementsByTagName("img");
-			var srcs = [];
+			let srcs = [];
 			for (let j = 0; j < imgs.length; j++) {
 				// first redirect mspaintadventures.com to /mspa
 				if (imgs[j].getAttribute("src").includes("http://www.mspaintadventures.com/")) {
@@ -245,53 +205,91 @@ async function doThings(item) {
 			}
 		}
 	}
-
+	// page specific things
+	if (window.location.pathname == "/options") {	// nuke homestuck.com page numbers
+		if (document.getElementById("viz-links").checked) {
+			document.getElementById("viz-links").click();
+			document.getElementsByTagName("form").item(0).submit();
+		}
+		document.getElementById("viz-links").disabled = true;
+	} else if (window.location.pathname.includes("/sbahj")) {	// sbahj
+		const imgs = document.getElementsByTagName("img");
+		let srcs = [];
+		for (let i = 0; i < imgs.length; i++) {
+			if (imgs[i].getAttribute("src").includes("/assets/img/sbahj/")) {	// page assets
+				srcs.push(imgs[i].getAttribute("src"));
+				imgs[i].src = lang_info['assets_dir_url'] + srcs[i].replace("/assets/img/sbahj/", "sweetbroandhellajeff/");
+				imgs[i].onerror = function() {
+					imgs[i].src = srcs[i];
+				}
+			} else {	// comic pages
+				srcs.push(imgs[i].getAttribute("src").substring(6));
+				imgs[i].src = lang_info['assets_dir_url'] + srcs[i];
+				imgs[i].onerror = function() {
+					imgs[i].src = "/mspa/" + srcs[i];
+				}
+			}
+		}
+		// replace comic-list
+		const sbahj_comic_list = await getJson(lang_info['data_dir_url'] + lang_info['data_files']['sbahj_comic_list']);
+		const comic_list_links = document.getElementById("comic-list").getElementsByTagName("a");
+		for (let i = 0; i < comic_list_links.length; i++) {
+			for (let j = 0; j < sbahj_comic_list['listedPages'].length; j++) {
+				if (comic_list_links[i].getAttribute("href") == sbahj_comic_list['listedPages'][j]['url']) {
+					comic_list_links[i].innerHTML = sbahj_comic_list['listedPages'][j]['title'];
+					break;
+				}
+			}
+		}
+	} else if (window.location.pathname.includes("/log")) {	// log pages
+		if (window.location.pathname.includes("/log/")) {	// so it doesn't throw an error on /log
+			const mspa_data = await getJson(lang_info['data_dir_url'] + lang_info['data_files']['translation_MSPA']);
+			const links = document.getElementById("content").getElementsByTagName("a");
+			for (let i = 1; i < links.length; i++) {	// start from 1 to skip order changer
+				const split = links[i].getAttribute("href").split("/");
+				links[i].innerHTML = mspa_data[split[split.length-1]]['title'];
+			}
+		}
+	} else if (window.location.pathname.includes("/map")) {	// map assets
+		const imgs = document.getElementsByTagName("img");
+		let srcs = [];
+		for (let i = 0; i < imgs.length; i++) {
+			srcs.push(imgs[i].getAttribute("src").substring(6));
+			imgs[i].src = lang_info['assets_dir_url'] + srcs[i];
+			imgs[i].onerror = function() {
+				imgs[i].src = "/mspa/" + srcs[i];
+			
+			}
+		}
+	}
 	// replace footer and menu-bar
-	if (document.getElementById("menu-bar").firstElementChild.innerHTML == "WORTHLESS GARBAGE.") {		// caliborn check
+	if (document.getElementById("menu-bar").firstElementChild.innerHTML == "WORTHLESS GARBAGE.") {	// caliborn check
 		replaceElementFromHtml("menu-bar", lang_info['replace_pages_url'] + "/" + lang_info['replace_menu_bar_caliborn']);
-	} else if (document.getElementById("menu-bar").getElementsByTagName('a').length > 20) {			// Act 6 Act 5 Act 1 x2 check
-		let newHtml = await fetch(lang_info['replace_pages_url'] + "/" + lang_info['replace_menu_bar']);
-		let newInnerHtml = await newHtml.text();
-		document.getElementById("menu-bar").innerHTML = newInnerHtml + "<div class=\"candycorn\"></div>" + newInnerHtml;
+	} else if (document.getElementById("menu-bar").getElementsByTagName('a').length > 20) {	// Act 6 Act 5 Act 1 x2 check
+		var newHtml = await fetch(lang_info['replace_pages_url'] + "/" + lang_info['replace_menu_bar']);
+		newHtml = await newHtml.text();
+		document.getElementById("menu-bar").innerHTML = newHtml + "<div class=\"candycorn\"></div>" + newHtml;
 	} else {
 		replaceElementFromHtml("menu-bar", lang_info['replace_pages_url'] + "/" + lang_info['replace_menu_bar']);
 	}
 	replaceElementFromHtml("footer", lang_info['replace_pages_url'] + "/" + lang_info['replace_footer']);
 }
 
-function onError(error) {
+function onError(error) {	// print an error to console
 	console.log(`Error: ${error}`);
 }
 
-async function getJson(url) {
+async function getJson(url) {	// read a json file to an object
 	return await (await fetch(url)).json();
 }
 
-function getNextPageNum(pageNum, i) {
+function getNextPageNum(pageNum, i) {	// get page number + i
 	var pageNumNum = parseInt(pageNum) + i;
 	pageNumNum = pageNumNum.toString();
 	if (pageNumNum.length < pageNum.length) {
 		pageNumNum = "0".repeat(pageNum.length-pageNumNum.length) + pageNumNum;
 	}
 	return pageNumNum;
-}
-
-function forceMspaNumbering() {
-	// spawncamp message box
-	if (document.getElementById("message-viz-links") != null) {
-		if (!document.getElementById("message-viz-links").checked) {
-			document.getElementById("message-viz-links").click();
-		}
-		document.getElementById("message-viz-links").disabled = true;
-		document.getElementById("message-box-dismiss").click();
-	}
-	if (window.location.pathname == "/options") {
-		if (document.getElementById("viz-links").checked) {
-			document.getElementById("viz-links").click();
-			document.getElementsByTagName("form").item(0).submit();
-		}
-		document.getElementById("viz-links").disabled = true;
-	}
 }
 
 function reloadAllScripts() {	// in case an overridden page has new scripts that need to execute
@@ -314,12 +312,12 @@ function reloadAllScripts() {	// in case an overridden page has new scripts that
 	});
 }
 
-async function replaceElementFromHtml(elementID, linkToHtml) {		// the file the link points to should contain the new innerHTML only
+async function replaceElementFromHtml(elementID, linkToHtml) {	// the file the link points to should contain the new innerHTML only
 	const newHtml = await fetch(linkToHtml);
 	document.getElementById(elementID).innerHTML = await newHtml.text();
 }
 
-function redirectToFirstPages() {
+function redirectPage() {	// if on specific page redirect to another
 	switch (window.location.pathname) {
 		case "/read/6":
 			window.location.replace("/read/6/001901");
