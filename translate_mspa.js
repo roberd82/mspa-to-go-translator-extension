@@ -19,12 +19,12 @@ async function doThings(item) {
 	// override page if defined in "replace_pages"
 	if (replacePage > -1) {
 		const newHtml = await fetch(lang_info['replace_pages_url'] + lang_info['replace_pages'][replacePage] + "/index.html");
-		document.body.innerHTML = await newHtml.text();
+		document.documentElement.innerHTML = await newHtml.text();
+		reloadAllScripts();
 		if (lang_info['replace_pages'][replacePage] == "/options") {
 			forceMspaNumbering();
 		}
-		reloadAllScripts();
-	} else if (window.location.pathname.includes("/sbahj/")) {	// sbahj
+	} else if (window.location.pathname.includes("/sbahj")) {	// sbahj
 		const imgs = document.getElementsByTagName("img");
 		var srcs = [];
 		for (let i = 0; i < imgs.length; i++) {
@@ -52,14 +52,26 @@ async function doThings(item) {
 				}
 			}
 		}
-	} else if (window.location.pathname.includes("/log/")) {	// log pages
-		const mspa_data = await getJson(lang_info['data_dir_url'] + lang_info['data_files']['translation_MSPA']);
-		const links = document.getElementById("content").getElementsByTagName("a");
-		for (let i = 1; i < links.length; i++) {
-			const split = links[i].getAttribute("href").split("/");
-			links[i].innerHTML = mspa_data[split[split.length-1]]['title'];
+	} else if (window.location.pathname.includes("/log")) {	// log pages
+		if (window.location.pathname.includes("/log/")) {	// so it doesn't throw an error on /log
+			const mspa_data = await getJson(lang_info['data_dir_url'] + lang_info['data_files']['translation_MSPA']);
+			const links = document.getElementById("content").getElementsByTagName("a");
+			for (let i = 1; i < links.length; i++) {
+				const split = links[i].getAttribute("href").split("/");
+				links[i].innerHTML = mspa_data[split[split.length-1]]['title'];
+			}
 		}
-
+	} else if (window.location.pathname.includes("/map")) {
+		const imgs = document.getElementsByTagName("img");
+		var srcs = [];
+		for (let i = 0; i < imgs.length; i++) {
+			srcs.push(imgs[i].getAttribute("src").substring(6));
+			imgs[i].src = lang_info['assets_dir_url'] + srcs[i];
+			imgs[i].onerror = function() {
+				imgs[i].src = "/mspa/" + srcs[i];
+			
+			}
+		}
 	} else {	// replace comic content
 		// get page number from current url
 		var pageNum = window.location.pathname.split("/");
@@ -128,10 +140,12 @@ async function doThings(item) {
 		// replace text and fix imported images and links
 		const texts = document.getElementsByClassName("comic-text");
 		var allTextSrcs = [];
+		var allTextHrefs = [];
 		for (let i = 0; i < texts.length; i++) {
 			texts[i].innerHTML = mspa_data[getNextPageNum(pageNum, i)]['content']/*.replaceAll("|PESTERLOG|", "")*/;
 
 			const links = texts[i].getElementsByTagName("a");
+			var hrefs = [];
 			for (let j = 0; j < links.length; j++) {
 				if (links[j].getAttribute("href").includes("http://www.mspaintadventures.com/")) {
 					links[j].setAttribute("href", links[j].getAttribute("href").replaceAll("http://www.mspaintadventures.com/", "/mspa/"));
@@ -155,14 +169,26 @@ async function doThings(item) {
 						links[j].setAttribute("href", links[j].getAttribute("href").replaceAll("&p=", "/"));
 					}
 				}
-
 				// external links
-				if (links[i].getAttribute("href").includes("/archive/external/")) {
-					const split = links[i].getAttribute("href").split("/archive/external/");
-					links[i].href = lang_info['external_links'][split[split.length-1]];
+				if (links[j].getAttribute("href").includes("/archive/external/")) {
+					const split = links[j].getAttribute("href").split("/archive/external/");
+					links[j].href = lang_info['external_links'][split[split.length-1]];
+				}
+				// going around CORS to check if linked asset has translated version
+				if (links[j].getAttribute("href").includes("/mspa/")) {
+					hrefs.push(links[j].getAttribute("href").substring(6));
+					const poorMansFetch = document.createElement("img");
+					poorMansFetch.src = lang_info['assets_dir_url'] + hrefs[j];
+					poorMansFetch.onerror = function () {
+						//poorMansFetch.src = "/mspa/" + allTextHrefs[i][j];
+						links[j].setAttribute("href", "/mspa/" + allTextHrefs[i][j]);
+					}
+					document.body.appendChild(poorMansFetch);
+					poorMansFetch.style.display = 'none';
+					links[j].setAttribute("href", poorMansFetch.getAttribute("src"));
 				}
 			}
-			// todo: redirect scraps, storyfiles the same way as media to check if exists
+			allTextHrefs.push(hrefs);
 
 			const imgs =  texts[i].getElementsByTagName("img");
 			var srcs = [];
@@ -173,7 +199,7 @@ async function doThings(item) {
 				} else if (imgs[j].getAttribute("src").includes("http://mspaintadventures.com/")) {
 					imgs[j].setAttribute("src", imgs[j].getAttribute("src").replaceAll("http://mspaintadventures.com/", "/mspa/"));
 				}
-
+				// then check if there is a translated version
 				if (imgs[j].getAttribute("src").includes("/mspa/")) {
 					srcs.push(imgs[j].getAttribute("src").substring(6));
 					imgs[j].src = lang_info['assets_dir_url'] + srcs[j];
@@ -187,8 +213,8 @@ async function doThings(item) {
 
 		// add footnotes
 		for (let k = 0; k < document.querySelectorAll("[id='page']").length; k++) {		// this loop is needed for Act 6 Act 5 Act 1 x2
-			for (let i = 0; i < lang_info['footnote_files'].length; i++) {
-				const footnote = await getJson(lang_info['data_dir_url'] + lang_info['data_files']['footnote_files'][i]);
+			for (let i = 0; i < lang_info['data_files']['footnotes'].length; i++) {
+				const footnote = await getJson(lang_info['data_dir_url'] + lang_info['data_files']['footnotes'][i]);
 				if (typeof footnote[getNextPageNum(pageNum, k)] != 'undefined') {
 					for (let j = 0; j < footnote[getNextPageNum(pageNum, k)].length; j++) {
 						const note = document.createElement("div");
