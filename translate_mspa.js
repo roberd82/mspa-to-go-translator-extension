@@ -24,22 +24,49 @@ async function doThings(item) {
 			forceMspaNumbering();
 		}
 		reloadAllScripts();
-	} else {// replace comic content
+	} else if (window.location.pathname.includes("/sbahj/")) {	// sbahj
+		const imgs = document.getElementsByTagName("img");
+		var srcs = [];
+		for (let i = 0; i < imgs.length; i++) {
+			if (imgs[i].getAttribute("src").includes("/assets/img/sbahj/")) {
+				srcs.push(imgs[i].getAttribute("src"));
+				imgs[i].src = lang_info['assets_dir_url'] + srcs[i].replace("/assets/img/sbahj/", "sweetbroandhellajeff/");
+				imgs[i].onerror = function() {
+					imgs[i].src = srcs[i];
+				}
+			} else {
+				srcs.push(imgs[i].getAttribute("src").substring(6));
+				imgs[i].src = lang_info['assets_dir_url'] + srcs[i];
+				imgs[i].onerror = function() {
+					imgs[i].src = "/mspa/" + srcs[i];
+				}
+			}
+		}
+		const sbahj_comic_list = await getJson(lang_info['data_dir_url'] + lang_info['data_files']['sbahj_comic_list']);
+		const comic_list_links = document.getElementById("comic-list").getElementsByTagName("a");
+		for (let i = 0; i < comic_list_links.length; i++) {
+			for (let j = 0; j < sbahj_comic_list['listedPages'].length; j++) {
+				if (comic_list_links[i].getAttribute("href") == sbahj_comic_list['listedPages'][j]['url']) {
+					comic_list_links[i].innerHTML = sbahj_comic_list['listedPages'][j]['title'];
+					break;
+				}
+			}
+		}
+	} else if (window.location.pathname.includes("/log/")) {	// log pages
+		const mspa_data = await getJson(lang_info['data_dir_url'] + lang_info['data_files']['translation_MSPA']);
+		const links = document.getElementById("content").getElementsByTagName("a");
+		for (let i = 1; i < links.length; i++) {
+			const split = links[i].getAttribute("href").split("/");
+			links[i].innerHTML = mspa_data[split[split.length-1]]['title'];
+		}
+
+	} else {	// replace comic content
 		// get page number from current url
 		var pageNum = window.location.pathname.split("/");
 		pageNum = pageNum[pageNum.length-1];
 
 		// load in translation data files
 		const mspa_data = await getJson(lang_info['data_dir_url'] + lang_info['data_files']['translation_MSPA']);
-		
-		// replace browser page title
-		document.title = mspa_data[pageNum]['title'] + " - MSPA To Go";
-
-		// replace titles (all these loops are needed because of Act 6 Act 5 Act 1 x2)
-		const titles = document.querySelectorAll("[id='title']");
-		for (let i = 0; i < titles.length; i++) {
-			titles[i].innerHTML = mspa_data[getNextPageNum(pageNum, i)]['title'];		
-		}
 
 		// replace gifs and flashes (and openbound someday)
 		const medias = document.querySelectorAll("[id='media']");
@@ -58,7 +85,6 @@ async function doThings(item) {
 			}
 			allSrcs.push(srcs);
 		}
-
 		const flashes = document.getElementsByTagName("ruffle-embed");
 		if (flashes.length > 0) {
 			for (let i = 0; i < flashes.length; i++) {
@@ -78,7 +104,28 @@ async function doThings(item) {
 			}
 		}
 
-		// fix imported images and links in the text
+		// replace commands, only works with mspa page numbers
+		const commandses = document.getElementsByClassName("commands");
+		for (let i = 0; i < commandses.length; i++) {
+			const commands = commandses[i].getElementsByClassName("command");
+			for (let j = 0; j < commands.length; j++) {
+				const split = commands[j].firstElementChild.getAttribute("href").split("/");
+				if (split.length > 1) {
+					commands[j].firstElementChild.innerHTML = mspa_data[split[split.length-1]]['title'];
+				}
+			}
+		}
+
+		// replace browser page title
+		document.title = mspa_data[pageNum]['title'] + " - MSPA To Go";
+
+		// replace titles (all these loops are needed because of Act 6 Act 5 Act 1 x2)
+		const titles = document.querySelectorAll("[id='title']");
+		for (let i = 0; i < titles.length; i++) {
+			titles[i].innerHTML = mspa_data[getNextPageNum(pageNum, i)]['title'];		
+		}
+
+		// replace text and fix imported images and links
 		const texts = document.getElementsByClassName("comic-text");
 		var allTextSrcs = [];
 		for (let i = 0; i < texts.length; i++) {
@@ -138,22 +185,10 @@ async function doThings(item) {
 			allTextSrcs.push(srcs);
 		}
 
-		// replace commands, only works with mspa page numbers
-		const commandses = document.getElementsByClassName("commands");
-		for (let i = 0; i < commandses.length; i++) {
-			const commands = commandses[i].getElementsByClassName("command");
-			for (let j = 0; j < commands.length; j++) {
-				const split = commands[j].firstElementChild.getAttribute("href").split("/");
-				if (split.length > 1) {
-					commands[j].firstElementChild.innerHTML = mspa_data[split[split.length-1]]['title'];
-				}
-			}
-		}
-
 		// add footnotes
 		for (let k = 0; k < document.querySelectorAll("[id='page']").length; k++) {		// this loop is needed for Act 6 Act 5 Act 1 x2
 			for (let i = 0; i < lang_info['footnote_files'].length; i++) {
-				const footnote = await getJson(lang_info['data_dir_url'] + lang_info['footnote_files'][i]);
+				const footnote = await getJson(lang_info['data_dir_url'] + lang_info['data_files']['footnote_files'][i]);
 				if (typeof footnote[getNextPageNum(pageNum, k)] != 'undefined') {
 					for (let j = 0; j < footnote[getNextPageNum(pageNum, k)].length; j++) {
 						const note = document.createElement("div");
@@ -183,18 +218,17 @@ async function doThings(item) {
 				}
 			}
 		}
-
 	}
 
 	// replace footer and menu-bar
 	if (document.getElementById("menu-bar").firstElementChild.innerHTML == "WORTHLESS GARBAGE.") {		// caliborn check
-		replaceElementFromHtml("menu-bar", lang_info['replace_pages_url'] + "/" + lang_info['replace_menu-bar-caliborn']);
+		replaceElementFromHtml("menu-bar", lang_info['replace_pages_url'] + "/" + lang_info['replace_menu_bar_caliborn']);
 	} else if (document.getElementById("menu-bar").getElementsByTagName('a').length > 20) {			// Act 6 Act 5 Act 1 x2 check
-		let newHtml = await fetch(lang_info['replace_pages_url'] + "/" + lang_info['replace_menu-bar']);
+		let newHtml = await fetch(lang_info['replace_pages_url'] + "/" + lang_info['replace_menu_bar']);
 		let newInnerHtml = await newHtml.text();
 		document.getElementById("menu-bar").innerHTML = newInnerHtml + "<div class=\"candycorn\"></div>" + newInnerHtml;
 	} else {
-		replaceElementFromHtml("menu-bar", lang_info['replace_pages_url'] + "/" + lang_info['replace_menu-bar']);
+		replaceElementFromHtml("menu-bar", lang_info['replace_pages_url'] + "/" + lang_info['replace_menu_bar']);
 	}
 	replaceElementFromHtml("footer", lang_info['replace_pages_url'] + "/" + lang_info['replace_footer']);
 }
@@ -259,7 +293,7 @@ async function replaceElementFromHtml(elementID, linkToHtml) {		// the file the 
 	document.getElementById(elementID).innerHTML = await newHtml.text();
 }
 
-function redirectToFirstPages(params) {
+function redirectToFirstPages() {
 	switch (window.location.pathname) {
 		case "/read/6":
 			window.location.replace("/read/6/001901");
@@ -275,6 +309,9 @@ function redirectToFirstPages(params) {
 			break;
 		case "/read/1":
 			window.location.replace("/read/2/000002");
+			break;
+		case "/sbahj": 
+			window.location.replace("/sbahj/1");
 			break;
 		default:
 			break;
