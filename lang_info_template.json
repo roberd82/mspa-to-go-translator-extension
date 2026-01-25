@@ -1,0 +1,49 @@
+{
+	"hs_progress": "002147",
+	"ps_progress": "000218",
+	"progress_text": "<b>Homestuck: 999999 pages translated</b><br><b>Problem Sleuth: 000000 pages translated</b>",
+	"progress_message": "[More pages are being translated]",
+	"lang": "English",
+	"code": "en",
+	"assets_dir_url": "https://some.domain/link/to/your/translated/Assets/",
+	"data_dir_url": "https://some.domain/link/to/your/translated/enData/",
+	"data_files": {
+		"translation_MSPA": "MSPA_EN.json",
+		"sbahj_comic_list": "sbahj_EN.json",
+		"footnotes": [
+			"footnotes_EN.json",
+			"optional_footnotes_EN.json"
+		]
+	},
+	"external_links": {
+		"bunny.mp4": "https://some.domain/link/to/your/translated/Assets/archive/external/bunny.mp4",
+		"beaglepuss.jpg": "http://images.google.com/images?hl=en&q=beagle+puss&btnG=Search+Images&gbv=2&aq=f&oq=",
+		"mspa_record.gif": "https://some.domain/link/to/your/translated/Assets/archive/external/mspa-record.gif",
+		"howdoilive.mp4": "https://some.domain/link/to/your/translated/Assets/archive/external/howdoilive.mp4",
+		"Incipisphere-5.png": "https://some.domain/link/to/your/translated/Assets/archive/external/Incipisphere-5.png",
+		"carnegie_study.jpg": "https://some.domain/link/to/your/translated/Assets/archive/external/carnegie_study.jpg",
+		"miracles.mp4": "http://tinyurl.com/MoThErFuCkInMiRaClEs",
+		"rufio.mp4": "https://some.domain/link/to/your/translated/Assets/archive/external/rufio.mp4",
+		"midnightcrew.mp4": "http://www.youtube.com/watch?v=QbsXLDNPvNc"
+	},
+	"replace_pages_url": "https://some.domain/link/to/your/translated/public",
+	"replace_menu_bar": "replace/menu-bar.html",
+	"replace_menu_bar_caliborn": "replace/menu-bar-caliborn.html",
+	"replace_footer": "replace/footer.html",
+	"replace_page_footer_left": "replace/page-footer-left.html",
+	"replace_page_footer_right": "replace/page-footer-right.html",
+	"replace_page_content": [
+		["/", "MSPA In Your Lang", "index.html"],
+		["/options", "OPTIONS", "replace/options.html"],
+		["/news", "NEWS", "news/index.html"],
+		["/privacy", "PRIVACY", "replace/privacy.html"],
+		["/legal", "LEGAL", "replace/legal.html"],
+		["/archive", "ARCHIVE", "replace/archive.html"],
+		["/map", "Select Map", "replace/map.html"],
+		["/log", "Select Log", "replace/log.html"]
+	],
+	"add_pages": [
+		"/info",
+		"/unlock"
+	]
+}
