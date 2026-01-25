@@ -136,6 +136,14 @@ async function doThings(item) {
 			var pageNum = window.location.pathname.split("/");
 			pageNum = pageNum[pageNum.length-1];
 
+			// get latest translated page number
+			let lastPage = 999999;
+			if (window.location.pathname.includes("/read/6")) {
+				lastPage = parseInt(lang_info['hs_progress']);
+			} else if (window.location.pathname.includes("/read/4")) {
+				lastPage = parseInt(lang_info['ps_progress']);
+			}
+
 			// load in translation data files
 			const mspa_data = await getJson(lang_info['data_dir_url'] + lang_info['data_files']['translation_MSPA']);
 
@@ -183,7 +191,10 @@ async function doThings(item) {
 				const commands = commandses[i].getElementsByClassName("command");
 				for (let j = 0; j < commands.length; j++) {
 					const split = commands[j].firstElementChild.getAttribute("href").split("/");
-					if (split.length > 1) {
+					if (parseInt(split[split.length-1]) > lastPage) {
+						commands[j].innerHTML = lang_info['progress_message'];
+						commands[j].style = "text-align: center;";
+					} else {
 						commands[j].firstElementChild.innerHTML = mspa_data[split[split.length-1]]['title'];
 					}
 				}
@@ -309,6 +320,13 @@ async function doThings(item) {
 					}
 				}
 			}
+
+			if (document.getElementById("page-footer-left") != 'undefined') {
+				replaceElementFromHtml("page-footer-left", lang_info['replace_pages_url'] + "/" + lang_info['replace_page_footer_left']);
+			}
+			if (document.getElementById("page-footer-right") != 'undefined') {
+				replaceElementFromHtml("page-footer-right", lang_info['replace_pages_url'] + "/" + lang_info['replace_page_footer_right']);
+			}
 		}
 	}
 
@@ -331,7 +349,31 @@ async function doThings(item) {
 		}
 		document.getElementById("viz-links").disabled = true;
 	} else if (window.location.pathname.includes("/log/")) {	// log pages
+		// get latest translated page number
+		let lastPage = 999999;
+		if (window.location.pathname.includes("/log/6")) {
+			lastPage = parseInt(lang_info['hs_progress']);
+		} else if (window.location.pathname.includes("/log/4")) {
+			lastPage = parseInt(lang_info['ps_progress']);
+		}
 		const mspa_data = await getJson(lang_info['data_dir_url'] + lang_info['data_files']['translation_MSPA']);
+		// remove untranslated links
+		const entries = document.querySelectorAll('#content a[href*="/read/"]');
+		entries.forEach(link => {
+			const linkNumber = parseInt(link.getAttribute('href').split('/').pop());
+			if (linkNumber > lastPage) {
+				const linkDate = link.previousSibling;
+				const linkBr = link.nextSibling;
+				link.remove(); 
+				if (linkDate) {
+					linkDate.remove();
+				}
+				if (linkBr && linkBr.tagName === 'BR') {
+					linkBr.remove();
+				}
+			}
+		});
+		// translate links
 		const links = document.getElementById("content").getElementsByTagName("a");
 		for (let i = 1; i < links.length; i++) {	// start from 1 to skip order changer
 			const split = links[i].getAttribute("href").split("/");
@@ -347,6 +389,11 @@ async function doThings(item) {
 				imgs[i].src = "/mspa/" + srcs[i];
 			}
 		}
+	} else if (window.location.pathname == "/archive") {
+		const progress = document.createElement("div");
+		progress.style = "text-align: center;";
+		progress.innerHTML = lang_info['progress_text'].replaceAll("999999", parseInt(getNextPageNum(lang_info['hs_progress'], -1900))).replaceAll("000000", parseInt(getNextPageNum(lang_info['ps_progress'], -218)));
+		document.getElementById("content").parentNode.insertBefore(progress, document.getElementById("content"))
 	}
 
 	// replace footer and menu-bar
