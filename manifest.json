@@ -1,11 +1,11 @@
 {
 	"manifest_version": 3,
 	"name": "MSPA Translator",
-	"version": "0.1",
+	"version": "0.2",
 
 	"description": "Apply translations to MSPA To Go mirrors",
 
-	"homepage_url": "https://gitea.roberd.me/forditasok/mspa-to-go-translation-extension",
+	"homepage_url": "https://github.com/roberd82/mspa-to-go-translator-extension",
 
 	"icons": {
 		"32": "icon.svg",
