@@ -39,6 +39,44 @@ The Data folder should have your .json files with the translated text in this fo
     }
 }
 ```
-The originals can be found in the Asset Pack's `/archive/data` folder.
+The originals can be found in the Asset Pack's `/archive/data` folder. The `mspa.json` file has more json objects, that just the mspa pages text, those should be moved in different .json files and the main text should be elevated from the "story" object into the root of the json.
 
 The public folder should contain .html files, that contain content, that will be replaced on the site.
+
+## `lang_info` values explained
+(Page number always refers to the MSPA page numbers, the Viz numbering is not supported and the extension disables it completely)
+- "hs_progress": the latest translated Homestuck page's number
+- "ps_progress": same but for Problem Sleuth
+- "progress_text": text to be displayed at the top of the `/archive` page, the six 9s get replaced with the HS progress, the six 0s with the PS progress
+- "lang": the name of your lang in your language
+- "code": your language's lang code
+- "assets_dir_url": your `Assets` folder, that mirrors the Asset Pack's structure (must have a trailing `/`)
+- "data_dir_url": your `Data` folder with all your .json files (I recommend prefixing it with your lang code like this: `enData`)
+- "data_files":
+  - "translation_MSPA": the main translation file
+  - "sbahj_comic_list": the comic list for SBAHJ in this format
+  ```
+  {
+    "listedPages": [
+      {"url": "/sbahj/46", "title": "COMIC #46: the game........... is afoof"},
+      {"url": "/sbahj/45", "title": "COMIC #45: cloink"},
+      ...
+      {"url": "/sbahj/1", "title": "COMIC #1: man listen, stairs. i am TELLING you"}
+    ]
+  }
+  ```
+  - "footnotes": array of all your footnote files
+- "external_links": links to every file from `/archive/external/` in the Asset Pack
+- "replace_pages_url": the folder with .html files that contain content to be replaced
+- "replace_something_something": path to the.html file (relative to "replace_pages_url") containing only the modified innerHtml of the html element with the same id (these have their own value, because they need to be replaced on almost every page)
+- "replace_page_content": pages that need to have the innerHtml of their `content` id div replaced
+  - first element: the path wich to replace on
+  - second element: the page title
+  - thir element: the path to the .html file relative to "replace_pages_url"
+  - there are three exceptions that work differently: the root `/`, `/options` and `/news`
+    - `/`: save the main page of an MSPA To Go instance and edit the contents of the div with the `content` id manually
+    - `/options`: almost works the same as the others, but only reads the label and span elements, must have the same order as on the normal page!
+    - `/news`: needs to be in it's own folder and named `index.html`, has `news-content` tag instead of `content`
+- "add_pages": adds completely new pages, need to be in their own folder and named `index.html` (actually just replaces the content of the 404 page, but whatever)
+
+Look at the included template and [my translation](https://gitea.roberd.me/forditasok/mspa-magyarul) for reference.
