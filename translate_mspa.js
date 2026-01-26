@@ -438,7 +438,25 @@ async function doThings(item) {
 		const progress = document.createElement("div");
 		progress.style = "text-align: center;";
 		progress.innerHTML = lang_info['progress_text'].replaceAll("999999", parseInt(getNextPageNum(lang_info['hs_progress'], -1900))).replaceAll("000000", parseInt(getNextPageNum(lang_info['ps_progress'], -218)));
-		document.getElementById("content").parentNode.insertBefore(progress, document.getElementById("content"))
+
+		try {
+			var newHtml = await fetch(lang_info['replace_pages_url'] + "/" + lang_info['replace_page_footer']);
+			newHtml = await newHtml.text();
+			const parser = new DOMParser();
+			newHtml = parser.parseFromString(newHtml, 'text/html');
+			progress.appendChild(document.createElement("br"));
+			const loadGame = newHtml.getElementById('load-game');
+
+			loadGame.style = "font-size: 16px; font-weight: 700; font-family: Verdana, Arial, Helvetica, sans-serif; cursor: pointer; text-decoration: underline;";
+
+			progress.appendChild(loadGame);
+		} catch (error) {
+			// it is what it is
+		}
+
+		document.getElementById("content").parentNode.insertBefore(progress, document.getElementById("content"));
+
+		
 	}
 
 	// replace footer and menu-bar

@@ -11,8 +11,7 @@ your-translation/
 │  │  ├─ menu-bar.html
 │  │  ├─ menu-bar-caliborn.html
 │  │  ├─ footer.html
-│  │  ├─ page-footer-left.html
-│  │  ├─ page-footer-right.html
+│  │  ├─ page-footer.html
 │  │  ├─ options.html
 │  ├─ news/
 │  │  ├─ index.html
@@ -68,7 +67,10 @@ The public folder should contain .html files, that contain content, that will be
   - "footnotes": array of all your footnote files
 - "external_links": links to every file from `/archive/external/` in the Asset Pack
 - "replace_pages_url": the folder with .html files that contain content to be replaced
-- "replace_something_something": path to the.html file (relative to "replace_pages_url") containing only the modified innerHtml of the html element with the same id (these have their own value, because they need to be replaced on almost every page)
+- "replace_menu_bar": the `<button id="menu-button">` element's outerHtml on the first line, then the menu-bars's links in order
+- "replace_menu_bar-caliborn": same as the previous, just the Caliborn version
+- "replace_footer": the `<div id="footer">` element's innerHtml
+- "replace_page_footer": all the links in the `<div id="page-footer">` element
 - "replace_page_content": pages that need to have the innerHtml of their `content` id div replaced
   - first element: the path wich to replace on
   - second element: the page title
