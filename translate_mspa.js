@@ -20,7 +20,7 @@ async function doThings(item) {
 	// find if defined in "replace_page_content"
 	let replacePage = -1;
 	for (let i = 0; i < lang_info['replace_page_content'].length; i++) {
-		if (window.location.pathname == lang_info['replace_page_content'][i][0]) {
+		if (window.location.pathname == lang_info['replace_page_content'][i][0] || window.location.pathname == lang_info['replace_page_content'][i][0] + "/") {
 			replacePage = i;
 			break;
 		}
@@ -29,7 +29,7 @@ async function doThings(item) {
 	let addPage = -1;
 	if (replacePage == -1) {
 		for (let i = 0; i < lang_info['add_pages'].length; i++) {
-			if (window.location.pathname == lang_info['add_pages'][i]) {
+			if (window.location.pathname == lang_info['add_pages'][i] || window.location.pathname == lang_info['add_pages'][i] + "/") {
 				addPage = i;
 				break;
 			}
@@ -387,7 +387,7 @@ async function doThings(item) {
 		}
 	}
 
-	if (window.location.pathname == "/options") {	// nuke homestuck.com page numbers
+	if (window.location.pathname.includes("/options")) {	// nuke homestuck.com page numbers
 		if (document.getElementById("viz-links").checked) {
 			document.getElementById("viz-links").click();
 			document.getElementsByTagName("form").item(0).submit();
@@ -434,7 +434,7 @@ async function doThings(item) {
 				imgs[i].src = "/mspa/" + srcs[i];
 			}
 		}
-	} else if (window.location.pathname == "/archive") {
+	} else if (window.location.pathname.includes("/archive")) {
 		const progress = document.createElement("div");
 		progress.style = "text-align: center;";
 		progress.innerHTML = lang_info['progress_text'].replaceAll("999999", parseInt(getNextPageNum(lang_info['hs_progress'], -1900))).replaceAll("000000", parseInt(getNextPageNum(lang_info['ps_progress'], -218)));
@@ -447,7 +447,7 @@ async function doThings(item) {
 			progress.appendChild(document.createElement("br"));
 			const loadGame = newHtml.getElementById('load-game');
 
-			loadGame.style = "font-size: 16px; font-weight: 700; font-family: Verdana, Arial, Helvetica, sans-serif; cursor: pointer; text-decoration: underline;";
+			loadGame.style = "font-size: 16px; font-weight: 700; font-family: Verdana, Arial, Helvetica, sans-serif; cursor: pointer; text-decoration: underline; color: #0000ee;";
 
 			progress.appendChild(loadGame);
 		} catch (error) {
