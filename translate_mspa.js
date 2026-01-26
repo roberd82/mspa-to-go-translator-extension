@@ -195,7 +195,11 @@ async function doThings(item) {
 						commands[j].innerHTML = lang_info['progress_message'];
 						commands[j].style = "text-align: center;";
 					} else {
-						commands[j].firstElementChild.innerHTML = mspa_data[split[split.length-1]]['title'];
+						try {
+							commands[j].firstElementChild.innerHTML = mspa_data[split[split.length-1]]['title'];
+						} catch (error) {
+							// nothin'
+						}
 					}
 				}
 			}
@@ -321,11 +325,52 @@ async function doThings(item) {
 				}
 			}
 
-			if (document.getElementById("page-footer-left") != 'undefined') {
-				replaceElementFromHtml("page-footer-left", lang_info['replace_pages_url'] + "/" + lang_info['replace_page_footer_left']);
-			}
-			if (document.getElementById("page-footer-right") != 'undefined') {
-				replaceElementFromHtml("page-footer-right", lang_info['replace_pages_url'] + "/" + lang_info['replace_page_footer_right']);
+			const pageFooters = document.querySelectorAll("[id='page-footer']");
+
+			try {	// replace page footer
+				var newHtml = await fetch(lang_info['replace_pages_url'] + "/" + lang_info['replace_page_footer']);
+				newHtml = await newHtml.text();
+				const parser = new DOMParser();
+				newHtml = parser.parseFromString(newHtml, 'text/html');
+				if (document.getElementById("page-footer-left") != null) {
+					let newElements = newHtml.getElementsByTagName("a");
+					let docElements = document.getElementById("page-footer-left").getElementsByTagName("a");
+
+					for (let i = 0; i < newElements.length; i++) {
+						for (let j = 0; j < docElements.length; j++) {
+							if (newElements[i].id == docElements[j].id) {
+								docElements[j].innerHTML = newElements[i].innerHTML;
+								break;
+							}
+						}
+					}
+				}
+				if (document.getElementById("page-footer-right") != null) {
+					let newElements = newHtml.getElementsByTagName("a");
+					let docElements;
+					if (document.getElementById("options-menu") != null) {
+						docElements = document.getElementById("options-menu").getElementsByTagName("a");
+						if (document.getElementById("options-link") != null && newHtml.getElementById("options-link") != null) {
+							document.getElementById("options-link"). innerHTML = newHtml.getElementById("options-link").innerHTML;
+						}
+					} else {
+						docElements = document.getElementById("page-footer-right").getElementsByTagName("a");
+					}
+
+					for (let i = 0; i < newElements.length; i++) {
+						for (let j = 0; j < docElements.length; j++) {
+							if (newElements[i].id == docElements[j].id) {
+								docElements[j].innerHTML = newElements[i].innerHTML;
+								break;
+							}
+						}
+					}
+				}
+				for (let i = 1; i < pageFooters.length; i++) {
+					pageFooters[i].innerHTML = pageFooters[i-1].innerHTML;
+				}
+			} catch (error) {
+				onError(error);
 			}
 		}
 	}
@@ -397,18 +442,38 @@ async function doThings(item) {
 	}
 
 	// replace footer and menu-bar
-	if (document.getElementById("menu-bar").firstElementChild.innerHTML == "WORTHLESS GARBAGE.") {	// caliborn check
-		replaceElementFromHtml("menu-bar", lang_info['replace_pages_url'] + "/" + lang_info['replace_menu_bar_caliborn']);
-	} else if (document.getElementById("menu-bar").getElementsByTagName('a').length > 20) {	// Act 6 Act 5 Act 1 x2 check
-		try {
-			var newHtml = await fetch(lang_info['replace_pages_url'] + "/" + lang_info['replace_menu_bar']);
-			newHtml = await newHtml.text();
-			document.getElementById("menu-bar").innerHTML = newHtml + "<div class=\"candycorn\"></div>" + newHtml;
-		} catch (error) {
-			// just don't throw error
+	if (document.getElementById("menu-bar") != null) {
+		let docElements;
+		if (document.getElementById("menu") != null) {	// mobile
+			docElements = document.getElementById("menu").getElementsByTagName("a");
+		} else {	// pc
+			docElements = document.getElementById("menu-bar").getElementsByTagName("a");
 		}
-	} else {
-		replaceElementFromHtml("menu-bar", lang_info['replace_pages_url'] + "/" + lang_info['replace_menu_bar']);
+
+		if (docElements.item(0).innerHTML == "WORTHLESS GARBAGE.") {
+			var newHtml = await fetch(lang_info['replace_pages_url'] + "/" + lang_info['replace_menu_bar_caliborn']);
+		} else {
+			var newHtml = await fetch(lang_info['replace_pages_url'] + "/" + lang_info['replace_menu_bar']);
+		}
+		newHtml = await newHtml.text();
+		const parser = new DOMParser();
+		newHtml = parser.parseFromString(newHtml, 'text/html');
+		let newElements = newHtml.getElementsByTagName("a");
+
+		if (document.getElementById("menu-button") != null && newHtml.getElementById("menu-button") != null) {
+			document.getElementById("menu-button"). innerHTML = newHtml.getElementById("menu-button").innerHTML;
+		}
+		
+		for (let i = 0; i < newElements.length; i++) {
+			docElements[i].innerHTML = newElements[i].innerHTML;
+		}
+
+		if (docElements.length > 20) {
+			for (let i = 0; i < newElements.length; i++) {
+				docElements[i+newElements.length].innerHTML = newElements[i].innerHTML;
+				
+			}
+		}
 	}
 	replaceElementFromHtml("footer", lang_info['replace_pages_url'] + "/" + lang_info['replace_footer']);
 	// end of script
