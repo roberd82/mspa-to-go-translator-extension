@@ -203,17 +203,17 @@ async function doThings(item) {
 					}
 				}
 			}
-			
+
 			try {	// replace titles
 				document.title = mspa_data[pageNum]['title'] + " - MSPA To Go";
 				const titles = document.querySelectorAll("[id='title']");
 				for (let i = 0; i < titles.length; i++) {
-					titles[i].innerHTML = mspa_data[getNextPageNum(pageNum, i)]['title'];		
+					titles[i].innerHTML = mspa_data[getNextPageNum(pageNum, i)]['title'];
 				}
 			} catch (error) {
 				// continue
 			}
-			
+
 			try {	// replace text and fix imported images and links
 				const texts = document.getElementsByClassName("comic-text");
 				let allTextSrcs = [];
@@ -409,7 +409,7 @@ async function doThings(item) {
 			if (linkNumber > lastPage) {
 				const linkDate = link.previousSibling;
 				const linkBr = link.nextSibling;
-				link.remove(); 
+				link.remove();
 				if (linkDate) {
 					linkDate.remove();
 				}
@@ -456,10 +456,10 @@ async function doThings(item) {
 
 		document.getElementById("content").parentNode.insertBefore(progress, document.getElementById("content"));
 
-		
+
 	}
 
-	// replace footer and menu-bar
+	// replace menu-bar
 	if (document.getElementById("menu-bar") != null) {
 		let docElements;
 		if (document.getElementById("menu") != null) {	// mobile
@@ -481,18 +481,18 @@ async function doThings(item) {
 		if (document.getElementById("menu-button") != null && newHtml.getElementById("menu-button") != null) {
 			document.getElementById("menu-button"). innerHTML = newHtml.getElementById("menu-button").innerHTML;
 		}
-		
+
 		for (let i = 0; i < newElements.length; i++) {
-			docElements[i].innerHTML = newElements[i].innerHTML;
+			docElements[i].outerHTML = newElements[i].outerHTML;
 		}
 
 		if (docElements.length > 20) {
 			for (let i = 0; i < newElements.length; i++) {
-				docElements[i+newElements.length].innerHTML = newElements[i].innerHTML;
-				
+				docElements[i+newElements.length].outerHTML = newElements[i].outerHTML;
 			}
 		}
 	}
+	// replace footer
 	replaceElementFromHtml("footer", lang_info['replace_pages_url'] + "/" + lang_info['replace_footer']);
 	// end of script
 }
@@ -516,14 +516,14 @@ function getNextPageNum(pageNum, i) {	// get page number + i
 
 function reloadAllScripts() {	// in case an overridden page has new scripts that need to execute
 	const scripts = document.querySelectorAll('script');
-	
+
 	scripts.forEach((oldScript) => {
 		const newScript = document.createElement('script');
-		
+
 		Array.from(oldScript.attributes).forEach(attr => {
 			newScript.setAttribute(attr.name, attr.value);
 		});
-		
+
 		newScript.appendChild(
 			document.createTextNode(oldScript.innerHTML)
 		);
@@ -560,7 +560,7 @@ function redirectPage() {	// if on specific page redirect to another
 		case "/read/1":
 			window.location.replace("/read/2/000002");
 			break;
-		case "/sbahj": 
+		case "/sbahj":
 			window.location.replace("/sbahj/1");
 			break;
 		default:
