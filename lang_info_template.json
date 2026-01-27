@@ -29,8 +29,8 @@
 	"replace_pages_url": "https://some.domain/link/to/your/translated/public",
 	"replace_menu_bar": "replace/menu-bar.html",
 	"replace_menu_bar_caliborn": "replace/menu-bar-caliborn.html",
-	"replace_footer": "replace/footer.html",
 	"replace_page_footer": "replace/page-footer.html",
+	"replace_footer": "replace/footer.html",
 	"replace_page_content": [
 		["/", "MSPA In Your Lang", "index.html"],
 		["/options", "OPTIONS", "replace/options.html"],
@@ -42,7 +42,7 @@
 		["/log", "Select Log", "replace/log.html"]
 	],
 	"add_pages": [
-		"/info",
-		"/unlock"
+		"/unlock",
+		"/info"
 	]
 }

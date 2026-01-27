@@ -1,3 +1,5 @@
+document.getElementById("version").innerHTML = "Version: " + browser.runtime.getManifest().version;
+
 function saveOptions(e) {
 	e.preventDefault();
 	browser.storage.sync.set({
