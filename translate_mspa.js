@@ -377,15 +377,20 @@ async function doThings(item) {
 
 	const webImgs = document.getElementsByTagName("img");
 	let webSrcs = [];
-	for (let l = 0; l < webImgs.length; l++) {	// search for translated web assets
+	for (let l = webImgs.length-1; l > 0; l--) {	// search for translated web assets
 		webSrcs.push(webImgs[l].getAttribute("src"));
 		if (webImgs[l].getAttribute("src").includes("/assets/img/")) {
-			webImgs[l].src = lang_info["assets_dir_url"] + webSrcs[l].replaceAll("/assets/img/", "images/");
-			webImgs[l].onerror = function() {
+			try {
+				webImgs[l].src = lang_info["assets_dir_url"] + webSrcs[l].replaceAll("/assets/img/", "images/");
+				webImgs[l].onerror = function() {
+					webImgs[l].src = webSrcs[l];
+				}
+			} catch (error) {
 				webImgs[l].src = webSrcs[l];
 			}
 		}
 	}
+	console.log(webImgs);
 
 	if (window.location.pathname.includes("/options")) {	// nuke homestuck.com page numbers
 		if (document.getElementById("viz-links").checked) {
@@ -447,7 +452,7 @@ async function doThings(item) {
 			progress.appendChild(document.createElement("br"));
 			const loadGame = newHtml.getElementById('load-game');
 
-			loadGame.style = "font-size: 16px; font-weight: 700; font-family: Verdana, Arial, Helvetica, sans-serif; cursor: pointer; text-decoration: underline; color: #0000ee;";
+			loadGame.style = "font-size: 16px; font-weight: 700; font-family: Verdana, Arial, Helvetica, sans-serif; cursor: pointer; text-decoration: underline; color: #5599ff;";
 
 			progress.appendChild(loadGame);
 		} catch (error) {
