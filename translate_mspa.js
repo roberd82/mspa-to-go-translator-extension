@@ -375,12 +375,12 @@ async function doThings(item) {
 		}
 	}
 
-	// todo: fix this mess
 	const webImgs = document.getElementsByTagName("img");
 	let webSrcs = [];
 	for (let l = 0; l < webImgs.length; l++) {	// search for translated web assets
 		if (!webImgs[l].getAttribute("src").includes("/assets/img/")) {
-			webImgs.splice(i, 1);
+			webImgs[l].parentNode.removeChild(webImgs[l]);
+			l--;
 		} else {
 			webSrcs.push(webImgs[l].getAttribute("src"));
 			webImgs[l].src = lang_info["assets_dir_url"] + webSrcs[l].replaceAll("/assets/img/", "images/");
