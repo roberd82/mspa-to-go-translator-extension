@@ -47,6 +47,7 @@ The public folder should contain .html files, that contain content, that will be
 - "hs_progress": the latest translated Homestuck page's number
 - "ps_progress": same but for Problem Sleuth
 - "progress_text": text to be displayed at the top of the `/archive` page, the six 9s get replaced with the HS progress, the six 0s with the PS progress
+- "progress_message": what will replace the commands to all the untranslated pages
 - "lang": the name of your lang in your language
 - "code": your language's lang code
 - "assets_dir_url": your `Assets` folder, that mirrors the Asset Pack's structure (must have a trailing `/`)

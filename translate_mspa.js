@@ -375,6 +375,7 @@ async function doThings(item) {
 		}
 	}
 
+	// todo: fix this mess
 	const webImgs = document.getElementsByTagName("img");
 	let webSrcs = [];
 	for (let l = webImgs.length-1; l > 0; l--) {	// search for translated web assets
@@ -390,7 +391,6 @@ async function doThings(item) {
 			}
 		}
 	}
-	console.log(webImgs);
 
 	if (window.location.pathname.includes("/options")) {	// nuke homestuck.com page numbers
 		if (document.getElementById("viz-links").checked) {
