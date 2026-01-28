@@ -461,19 +461,135 @@ async function doTheTranslateyThing(item) {
 	} else if (window.location.pathname.includes("/map/6")) {	// hs map progress
 		// todo: only search for replacement for images with text an side, part, and disc assets
 		// also check for translation progress
-		/*const hsProgress = lang_info['hs_progress'];
+		const hsProgress = lang_info['hs_progress'];
 		const tableCols = document.getElementsByTagName("tr").item(0).getElementsByTagName("td");
+		// what to remove
+		const links = tableCols[2].getElementsByTagName("a");
+		for (let i = 0; i < links.length; i++) {
+			if (hsProgress < parseInt(links[i].getAttribute("href").split("/").pop())) {
+				links[i].remove();
+				i--;
+			}
+		}
 		for (let i = 0; i < tableCols.length; i++) {
-			if (i == 2) {
-				const links = tableCols[i].getElementsByTagName("a");
-				for (let j = 0; j < links.length; j++) {
-					if (hsProgress < parseInt(links[j].getAttribute("href").split("/").pop())) {
-						console.log(links[j]);
-						links[j].remove();
+			const tdImgs = tableCols[i].getElementsByTagName("img");
+			for (let j = 0; j < tdImgs.length; j++) {
+				if (tdImgs[j].src.includes("map_side1.gif") && hsProgress < 6012) {
+					tdImgs[j].remove();
+					j--;
+					continue;
+				}
+				if (tdImgs[j].src.includes("map_side2.gif") && hsProgress < 6013) {
+					tdImgs[j].remove();
+					j--;
+					continue;
+				}
+				if (tdImgs[j].src.includes("map_part1.gif") && hsProgress < 3888) {
+					tdImgs[j].remove();
+					j--;
+					continue;
+				}
+				if (tdImgs[j].src.includes("map_part2b.gif") && hsProgress < 3889) {
+					tdImgs[j].remove();
+					j--;
+					continue;
+				}
+				if (tdImgs[j].src.includes("map_part3.gif") && hsProgress < 6013) {
+					tdImgs[j].remove();
+					j--;
+					continue;
+				}
+				if (tdImgs[j].src.includes("map_part4.gif") && hsProgress < 8143) {
+					tdImgs[j].remove();
+					j--;
+					continue;
+				}
+				if (tdImgs[j].src.includes("map_bifurcate.gif") && hsProgress < 3889) {
+					tdImgs[j].remove();
+					j--;
+					continue;
+				}
+				if (tdImgs[j].src.includes("map_splitA6.gif") && hsProgress < 6013) {
+					tdImgs[j].remove();
+					j--;
+					continue;
+				}
+				if (tdImgs[j].src.includes("map_splitA6_6.gif") && hsProgress < 8143) {
+					tdImgs[j].remove();
+					j--;
+					continue;
+				}
+				if (tdImgs[j].src.includes("map_disc1.gif") && hsProgress < 5614) {
+					tdImgs[j].remove();
+					j--;
+					continue;
+				}
+				if (tdImgs[j].src.includes("map_disc2.gif") && hsProgress < 5643) {
+					tdImgs[j].remove();
+					j--;
+					continue;
+				}
+				if (tdImgs[j].src.includes("map_cartridge.gif") && hsProgress < 8178) {
+					tdImgs[j].remove();
+					j--;
+					continue;
+				}
+			}
+		}
+		// what to change src for
+		let allSrcs = [];
+		for (let j = 0; j < tableCols.length; j++) {
+			const imgs = tableCols[j].getElementsByTagName("img");
+			let srcs = [];
+				for (let i = 0; i < imgs.length; i++) {
+				srcs.push(imgs[i].getAttribute("src").substring(6));
+				if (
+					(srcs[i].includes("map_06_01.gif") ||
+					srcs[i].includes("map_06_02.gif") ||
+					srcs[i].includes("map_06_03.gif") ||
+					srcs[i].includes("map_06_04.gif") ||
+					srcs[i].includes("map_06_05.gif") ||
+					srcs[i].includes("map_06_051.gif") ||
+					srcs[i].includes("map_06_052.gif") ||
+					srcs[i].includes("map_06_06.gif") ||
+					srcs[i].includes("map_06_061.gif") ||
+					srcs[i].includes("map_06_062b.gif") ||
+					srcs[i].includes("map_06_063b.gif") ||
+					srcs[i].includes("map_06_064.gif") ||
+					srcs[i].includes("map_06_065.gif") ||
+					srcs[i].includes("map_06_0661.gif") ||
+					srcs[i].includes("map_06_0661_I1.gif") ||
+					srcs[i].includes("map_06_0662.gif") ||
+					srcs[i].includes("map_06_0662_I2.gif") ||
+					srcs[i].includes("map_06_0663.gif") ||
+					srcs[i].includes("map_06_0663_I3.gif") ||
+					srcs[i].includes("map_06_0664.gif") ||
+					srcs[i].includes("map_06_0664_I4.gif") ||
+					srcs[i].includes("map_06_0665.gif") ||
+					srcs[i].includes("map_06_0665_I5.gif") ||
+					srcs[i].includes("map_06_0666.gif") ||
+					srcs[i].includes("map_06_07.gif") ||
+					srcs[i].includes("map_06_07_01.gif") ||
+					srcs[i].includes("map_06_cascade.gif") ||
+					srcs[i].includes("map_06_I1.gif") ||
+					srcs[i].includes("map_06_I2.gif") ||
+					srcs[i].includes("map_06_I3.gif") ||
+					srcs[i].includes("map_06_I4.gif") ||
+					srcs[i].includes("map_06_I5.gif") ||
+					srcs[i].includes("map_06_int.gif") ||
+					srcs[i].includes("map_06_int2.gif") ||
+					srcs[i].includes("map_bifurcate.gif") ||
+					srcs[i].includes("map_splitA6.gif") ||
+					srcs[i].includes("map_splitA6_6.gif")) || j != 2
+				) {		// only check for images with text on them for performance
+					imgs[i].src = lang_info["assets_dir_url"] + srcs[i];
+					imgs[i].onerror = function() {
+						imgs[i].src = "/mspa/" + allSrcs[j][i];
 					}
 				}
 			}
-		}*/
+			allSrcs.push(srcs);
+		}	
 	} else if (window.location.pathname.includes("/archive")) {
 		const progress = document.createElement("div");
 		progress.style = "text-align: center;";
