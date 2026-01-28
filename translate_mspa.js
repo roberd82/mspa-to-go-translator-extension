@@ -349,6 +349,8 @@ async function doTheTranslateyThing(item) {
 		}
 	}
 
+	// things for every page
+
 	const allImgs = document.getElementsByTagName("img");
 	let webImgs = [];
 	for (let l = 0; l < allImgs.length; l++) {
@@ -380,7 +382,7 @@ async function doTheTranslateyThing(item) {
 			lastPage = parseInt(lang_info['ps_progress']);
 		}
 		const mspa_data = await getJson(lang_info['data_dir_url'] + lang_info['data_files']['translation_MSPA']);
-		// remove untranslated links
+		// remove links to untranslated pages
 		const entries = document.querySelectorAll('#content a[href*="/read/"]');
 		entries.forEach(link => {
 			const linkNumber = parseInt(link.getAttribute('href').split('/').pop());
@@ -402,32 +404,88 @@ async function doTheTranslateyThing(item) {
 			const split = links[i].getAttribute("href").split("/");
 			links[i].innerHTML = mspa_data[split[split.length-1]]['title'];
 		}
-	} else if (window.location.pathname.includes("/map/")) {	// map assets
-		const imgs = document.getElementsByTagName("img");
-		let srcs = [];
-		for (let i = 0; i < imgs.length; i++) {
-			srcs.push(imgs[i].getAttribute("src").substring(6));
-			imgs[i].src = lang_info['assets_dir_url'] + srcs[i];
-			imgs[i].onerror = function() {
-				imgs[i].src = "/mspa/" + srcs[i];
-			}
+	} else if (window.location.pathname.includes("/map/4")) {	// ps map progress
+		const map = document.getElementsByTagName("img").item(0);
+		const mapSrc = map.getAttribute("src").substring(6);
+
+		var psProgress = parseInt(lang_info['ps_progress']);
+		if (psProgress >= 1708) {
+			map.src = lang_info['assets_dir_url'] + mapSrc;
+		} else if (psProgress >= 1655) {
+			map.src = lang_info['assets_dir_url'] + mapSrc.replaceAll("04.gif", "04_21.gif");
+		} else if (psProgress >= 1589) {
+			map.src = lang_info['assets_dir_url'] + mapSrc.replaceAll("04.gif", "04_20.gif");
+		} else if (psProgress >= 1507) {
+			map.src = lang_info['assets_dir_url'] + mapSrc.replaceAll("04.gif", "04_19.gif");
+		} else if (psProgress >= 1466) {
+			map.src = lang_info['assets_dir_url'] + mapSrc.replaceAll("04.gif", "04_18.gif");
+		} else if (psProgress >= 1406) {
+			map.src = lang_info['assets_dir_url'] + mapSrc.replaceAll("04.gif", "04_17.gif");
+		} else if (psProgress >= 1299) {
+			map.src = lang_info['assets_dir_url'] + mapSrc.replaceAll("04.gif", "04_16.gif");
+		} else if (psProgress >= 1257) {
+			map.src = lang_info['assets_dir_url'] + mapSrc.replaceAll("04.gif", "04_15.gif");
+		} else if (psProgress >= 1149) {
+			map.src = lang_info['assets_dir_url'] + mapSrc.replaceAll("04.gif", "04_14.gif");
+		} else if (psProgress >= 1069) {
+			map.src = lang_info['assets_dir_url'] + mapSrc.replaceAll("04.gif", "04_13.gif");
+		} else if (psProgress >= 1030) {
+			map.src = lang_info['assets_dir_url'] + mapSrc.replaceAll("04.gif", "04_12.gif");
+		} else if (psProgress >= 953) {
+			map.src = lang_info['assets_dir_url'] + mapSrc.replaceAll("04.gif", "04_11.gif");
+		} else if (psProgress >= 873) {
+			map.src = lang_info['assets_dir_url'] + mapSrc.replaceAll("04.gif", "04_10.gif");
+		} else if (psProgress >= 816) {
+			map.src = lang_info['assets_dir_url'] + mapSrc.replaceAll("04.gif", "04_09.gif");
+		} else if (psProgress >= 742) {
+			map.src = lang_info['assets_dir_url'] + mapSrc.replaceAll("04.gif", "04_08.gif");
+		} else if (psProgress >= 666) {
+			map.src = lang_info['assets_dir_url'] + mapSrc.replaceAll("04.gif", "04_07.gif");
+		} else if (psProgress >= 604) {
+			map.src = lang_info['assets_dir_url'] + mapSrc.replaceAll("04.gif", "04_06.gif");
+		} else if (psProgress >= 546) {
+			map.src = lang_info['assets_dir_url'] + mapSrc.replaceAll("04.gif", "04_05.gif");
+		} else if (psProgress >= 448) {
+			map.src = lang_info['assets_dir_url'] + mapSrc.replaceAll("04.gif", "04_04.gif");
+		} else if (psProgress >= 402) {
+			map.src = lang_info['assets_dir_url'] + mapSrc.replaceAll("04.gif", "04_03.gif");
+		} else if (psProgress >= 302) {
+			map.src = lang_info['assets_dir_url'] + mapSrc.replaceAll("04.gif", "04_02.gif");
+		} else {
+			map.src = lang_info['assets_dir_url'] + mapSrc.replaceAll("04.gif", "04_01.gif");
 		}
+		console.log(map.src)
+		map.onerror = function() {
+			map.src = "/mspa/" + mapSrc;
+		}
+	} else if (window.location.pathname.includes("/map/6")) {	// hs map progress
+		// todo: only search for replacement for images with text an side, part, and disc assets
+		// also check for translation progress
+		/*const hsProgress = lang_info['hs_progress'];
+		const tableCols = document.getElementsByTagName("tr").item(0).getElementsByTagName("td");
+		for (let i = 0; i < tableCols.length; i++) {
+			if (i == 2) {
+				const links = tableCols[i].getElementsByTagName("a");
+				for (let j = 0; j < links.length; j++) {
+					if (hsProgress < parseInt(links[j].getAttribute("href").split("/").pop())) {
+						console.log(links[j]);
+						links[j].remove();
+					}
+				}
+			}
+		}*/
 	} else if (window.location.pathname.includes("/archive")) {
 		const progress = document.createElement("div");
 		progress.style = "text-align: center;";
 		progress.innerHTML = lang_info['progress_text'].replaceAll("999999", parseInt(getNextPageNum(lang_info['hs_progress'], -1900))).replaceAll("000000", parseInt(getNextPageNum(lang_info['ps_progress'], -218)));
 
-		try {
-			var newHtml = await parseDomFromFile(lang_info['replace_pages_url'] + "/" + lang_info['replace_page_footer']);
-			progress.appendChild(document.createElement("br"));
-			const loadGame = newHtml.getElementById('load-game');
+		var newHtml = await parseDomFromFile(lang_info['replace_pages_url'] + "/" + lang_info['replace_page_footer']);
+		progress.appendChild(document.createElement("br"));
+		const loadGame = newHtml.getElementById('load-game');
 
-			loadGame.style = "font-size: 16px; font-weight: 700; font-family: Verdana, Arial, Helvetica, sans-serif; cursor: pointer; text-decoration: underline; color: #5599ff;";
+		loadGame.style = "font-size: 16px; font-weight: 700; font-family: Verdana, Arial, Helvetica, sans-serif; cursor: pointer; text-decoration: underline; color: #5599ff;";
 
-			progress.appendChild(loadGame);
-		} catch (error) {
-			// it is what it is
-		}
+		progress.appendChild(loadGame);
 
 		document.getElementById("content").parentNode.insertBefore(progress, document.getElementById("content"));
 
