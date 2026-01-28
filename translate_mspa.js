@@ -11,9 +11,9 @@ if (document.getElementById("message-viz-links") != null) {
 
 redirectPage();
 
-browser.storage.sync.get("translation_link").then(doThings, onError);
+browser.storage.sync.get("translation_link").then(doTheTranslateyThing, onError);
 // everything is in this function, since if we don't have a translation link we can't do anything anyway
-async function doThings(item) {
+async function doTheTranslateyThing(item) {
 	// load the lang_info file
 	const lang_info = await getJson(item['translation_link'] || "https://gitea.roberd.me/forditasok/mspa-magyarul/raw/branch/main/lang_info.json");
 
@@ -41,53 +41,34 @@ async function doThings(item) {
 		// first the three special cases
 		if (lang_info['replace_page_content'][replacePage][0] == "/") {
 			document.getElementById("title").innerHTML = lang_info['replace_page_content'][replacePage][1];
-			try {
-				var newHtml = await fetch(lang_info['replace_pages_url'] + "/" + lang_info['replace_page_content'][replacePage][2]);
-				newHtml = await newHtml.text();
-				const parser = new DOMParser();
-				newHtml = parser.parseFromString(newHtml, 'text/html');
-				newHtml = newHtml.getElementById("content");
-				document.getElementById("content").innerHTML = newHtml.innerHTML;
-			} catch (error) {
-				console.error("Page marked for override, but there is no file.");
-			}
+
+			var newHtml = await parseDomFromFile(lang_info['replace_pages_url'] + "/" + lang_info['replace_page_content'][replacePage][2]);
+			newHtml = newHtml.getElementById("content");
+			document.getElementById("content").innerHTML = newHtml.innerHTML;
 		} else if (lang_info['replace_page_content'][replacePage][0] == "/options") {
 			document.getElementById("title").innerHTML = lang_info['replace_page_content'][replacePage][1];
-			try {
-				var newHtml = await fetch(lang_info['replace_pages_url'] + "/" + lang_info['replace_page_content'][replacePage][2]);
-				newHtml = await newHtml.text();
-				const parser = new DOMParser();
-				newHtml = parser.parseFromString(newHtml, 'text/html');
-				let newElements = newHtml.getElementsByTagName("label");
-				let docElements = document.getElementById("content").getElementsByTagName("label");
-				for (let i = 0; i < newElements.length; i++) {
-					for (let j = 0; j < docElements.length; j++) {
-						if (newElements[i].getAttribute("for") == docElements[j].getAttribute("for")) {
-							docElements[j].innerHTML = newElements[i].innerHTML;
-							break;
+
+			var newHtml = await parseDomFromFile(lang_info['replace_pages_url'] + "/" + lang_info['replace_page_content'][replacePage][2]);
+			let newElements = newHtml.getElementsByTagName("label");
+			let docElements = document.getElementById("content").getElementsByTagName("label");
+			for (let i = 0; i < newElements.length; i++) {
+				for (let j = 0; j < docElements.length; j++) {
+					if (newElements[i].getAttribute("for") == docElements[j].getAttribute("for")) {
+						docElements[j].innerHTML = newElements[i].innerHTML;
+						if (docElements[j].nextElementSibling.id == "font-size-value") {
+							docElements[j].nextElementSibling.nextElementSibling.nextElementSibling.innerHTML = newElements[i].nextElementSibling.nextElementSibling.nextElementSibling.innerHTML;
+						} else {
+							docElements[j].nextElementSibling.nextElementSibling.innerHTML = newElements[i].nextElementSibling.nextElementSibling.innerHTML;
 						}
+						break;
 					}
 				}
-				newElements = newHtml.getElementsByTagName("span");
-				docElements = document.getElementById("content").getElementsByTagName("span");
-				for (let i = 0; i < newElements.length; i++) {
-					docElements[i].innerHTML = newElements[i].innerHTML;
-				}
-			} catch (error) {
-				console.error("Page marked for override, but there is no file.");
 			}
 		} else if (lang_info['replace_page_content'][replacePage][0] == "/news") {
 			document.getElementById("news-title").firstElementChild.setAttribute("alt", lang_info['replace_page_content'][replacePage][1]);
-			try {
-				var newHtml = await fetch(lang_info['replace_pages_url'] + "/" + lang_info['replace_page_content'][replacePage][2]);
-				newHtml = await newHtml.text();
-				const parser = new DOMParser();
-				newHtml = parser.parseFromString(newHtml, 'text/html');
-				newHtml = newHtml.getElementById("news-content");
-				document.getElementById("news-content").innerHTML = newHtml.innerHTML;
-			} catch (error) {
-				console.error("Page marked for override, but there is no file.");
-			}
+			var newHtml = await parseDomFromFile(lang_info['replace_pages_url'] + "/" + lang_info['replace_page_content'][replacePage][2]);
+			newHtml = newHtml.getElementById("news-content");
+			document.getElementById("news-content").innerHTML = newHtml.innerHTML;
 		} else {	// then the ones thats just replace the content of the innerHtml
 			document.getElementById("title").innerHTML = lang_info['replace_page_content'][replacePage][1];
 			replaceElementFromHtml("content", lang_info['replace_pages_url']+ "/" + lang_info['replace_page_content'][replacePage][2]);
@@ -191,7 +172,7 @@ async function doThings(item) {
 				const commands = commandses[i].getElementsByClassName("command");
 				for (let j = 0; j < commands.length; j++) {
 					const split = commands[j].firstElementChild.getAttribute("href").split("/");
-					if (parseInt(split[split.length-1]) > lastPage) {
+					if (parseInt(split[split.length-1]) > lastPage && pageNum <= lastPage) {
 						commands[j].innerHTML = lang_info['progress_message'];
 						commands[j].style = "text-align: center;";
 					} else {
@@ -204,7 +185,7 @@ async function doThings(item) {
 				}
 			}
 
-			try {	// replace titles
+			try {	// replace titles (I don't remember why I put this in a trycatch block)
 				document.title = mspa_data[pageNum]['title'] + " - MSPA To Go";
 				const titles = document.querySelectorAll("[id='title']");
 				for (let i = 0; i < titles.length; i++) {
@@ -326,67 +307,61 @@ async function doThings(item) {
 			}
 
 			const pageFooters = document.querySelectorAll("[id='page-footer']");
+			// replace page footer
+			var newHtml = await parseDomFromFile(lang_info['replace_pages_url'] + "/" + lang_info['replace_page_footer']);
+			if (document.getElementById("page-footer-left") != null) {
+				let newElements = newHtml.getElementsByTagName("a");
+				let docElements = document.getElementById("page-footer-left").getElementsByTagName("a");
 
-			try {	// replace page footer
-				var newHtml = await fetch(lang_info['replace_pages_url'] + "/" + lang_info['replace_page_footer']);
-				newHtml = await newHtml.text();
-				const parser = new DOMParser();
-				newHtml = parser.parseFromString(newHtml, 'text/html');
-				if (document.getElementById("page-footer-left") != null) {
-					let newElements = newHtml.getElementsByTagName("a");
-					let docElements = document.getElementById("page-footer-left").getElementsByTagName("a");
-
-					for (let i = 0; i < newElements.length; i++) {
-						for (let j = 0; j < docElements.length; j++) {
-							if (newElements[i].id == docElements[j].id) {
-								docElements[j].innerHTML = newElements[i].innerHTML;
-								break;
-							}
+				for (let i = 0; i < newElements.length; i++) {
+					for (let j = 0; j < docElements.length; j++) {
+						if (newElements[i].id == docElements[j].id) {
+							docElements[j].innerHTML = newElements[i].innerHTML;
+							break;
 						}
 					}
 				}
-				if (document.getElementById("page-footer-right") != null) {
-					let newElements = newHtml.getElementsByTagName("a");
-					let docElements;
-					if (document.getElementById("options-menu") != null) {
-						docElements = document.getElementById("options-menu").getElementsByTagName("a");
-						if (document.getElementById("options-link") != null && newHtml.getElementById("options-link") != null) {
-							document.getElementById("options-link"). innerHTML = newHtml.getElementById("options-link").innerHTML;
-						}
-					} else {
-						docElements = document.getElementById("page-footer-right").getElementsByTagName("a");
+			}
+			if (document.getElementById("page-footer-right") != null) {
+				let newElements = newHtml.getElementsByTagName("a");
+				let docElements;
+				if (document.getElementById("options-menu") != null) {
+					docElements = document.getElementById("options-menu").getElementsByTagName("a");
+					if (document.getElementById("options-link") != null && newHtml.getElementById("options-link") != null) {
+						document.getElementById("options-link").innerHTML = newHtml.getElementById("options-link").innerHTML;
 					}
+				} else {
+					docElements = document.getElementById("page-footer-right").getElementsByTagName("a");
+				}
 
-					for (let i = 0; i < newElements.length; i++) {
-						for (let j = 0; j < docElements.length; j++) {
-							if (newElements[i].id == docElements[j].id) {
-								docElements[j].innerHTML = newElements[i].innerHTML;
-								break;
-							}
+				for (let i = 0; i < newElements.length; i++) {
+					for (let j = 0; j < docElements.length; j++) {
+						if (newElements[i].id == docElements[j].id) {
+							docElements[j].innerHTML = newElements[i].innerHTML;
+							break;
 						}
 					}
 				}
-				for (let i = 1; i < pageFooters.length; i++) {
-					pageFooters[i].innerHTML = pageFooters[i-1].innerHTML;
-				}
-			} catch (error) {
-				onError(error);
+			}
+			for (let i = 1; i < pageFooters.length; i++) {	// copy page-footer in Act 6 Act 5 Act 1 x2
+				pageFooters[i].innerHTML = pageFooters[i-1].innerHTML;
 			}
 		}
 	}
 
-	const webImgs = document.getElementsByTagName("img");
+	const allImgs = document.getElementsByTagName("img");
+	let webImgs = [];
+	for (let l = 0; l < allImgs.length; l++) {
+		if (allImgs[l].getAttribute("src").includes("/assets/img/")) {
+			webImgs.push(allImgs[l]);
+		}
+	}
 	let webSrcs = [];
 	for (let l = 0; l < webImgs.length; l++) {	// search for translated web assets
-		if (!webImgs[l].getAttribute("src").includes("/assets/img/")) {
-			webImgs[l].parentNode.removeChild(webImgs[l]);
-			l--;
-		} else {
-			webSrcs.push(webImgs[l].getAttribute("src"));
-			webImgs[l].src = lang_info["assets_dir_url"] + webSrcs[l].replaceAll("/assets/img/", "images/");
-			webImgs[l].onerror = function() {
-				webImgs[l].src = webSrcs[l];
-			}
+		webSrcs.push(webImgs[l].getAttribute("src"));
+		webImgs[l].src = lang_info["assets_dir_url"] + webSrcs[l].replaceAll("/assets/img/", "images/");
+		webImgs[l].onerror = function() {
+			webImgs[l].src = webSrcs[l];
 		}
 	}
 
@@ -443,10 +418,7 @@ async function doThings(item) {
 		progress.innerHTML = lang_info['progress_text'].replaceAll("999999", parseInt(getNextPageNum(lang_info['hs_progress'], -1900))).replaceAll("000000", parseInt(getNextPageNum(lang_info['ps_progress'], -218)));
 
 		try {
-			var newHtml = await fetch(lang_info['replace_pages_url'] + "/" + lang_info['replace_page_footer']);
-			newHtml = await newHtml.text();
-			const parser = new DOMParser();
-			newHtml = parser.parseFromString(newHtml, 'text/html');
+			var newHtml = await parseDomFromFile(lang_info['replace_pages_url'] + "/" + lang_info['replace_page_footer']);
 			progress.appendChild(document.createElement("br"));
 			const loadGame = newHtml.getElementById('load-game');
 
@@ -472,13 +444,10 @@ async function doThings(item) {
 		}
 
 		if (docElements.item(0).innerHTML == "WORTHLESS GARBAGE.") {
-			var newHtml = await fetch(lang_info['replace_pages_url'] + "/" + lang_info['replace_menu_bar_caliborn']);
+			var newHtml = await parseDomFromFile(lang_info['replace_pages_url'] + "/" + lang_info['replace_menu_bar_caliborn']);
 		} else {
-			var newHtml = await fetch(lang_info['replace_pages_url'] + "/" + lang_info['replace_menu_bar']);
+			var newHtml = await parseDomFromFile(lang_info['replace_pages_url'] + "/" + lang_info['replace_menu_bar']);
 		}
-		newHtml = await newHtml.text();
-		const parser = new DOMParser();
-		newHtml = parser.parseFromString(newHtml, 'text/html');
 		let newElements = newHtml.getElementsByTagName("a");
 
 		if (document.getElementById("menu-button") != null && newHtml.getElementById("menu-button") != null) {
@@ -568,5 +537,16 @@ function redirectPage() {	// if on specific page redirect to another
 			break;
 		default:
 			break;
+	}
+}
+
+async function parseDomFromFile(url) {
+	try {
+		var newHtml = await fetch(url);
+		newHtml = await newHtml.text();
+		const parser = new DOMParser();
+		return parser.parseFromString(newHtml, 'text/html');
+	} catch (error) {
+		onError(error);
 	}
 }
