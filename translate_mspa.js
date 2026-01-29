@@ -273,7 +273,8 @@ async function doTheTranslateyThing(item) {
 			}
 
 			// add footnotes
-			for (let k = 0; k < document.querySelectorAll("[id='page']").length; k++) {		// this loop is needed for Act 6 Act 5 Act 1 x2
+			const pages = document.querySelectorAll("[id='page']");
+			for (let k = 0; k < pages.length; k++) {		// this loop is needed for Act 6 Act 5 Act 1 x2
 				for (let i = 0; i < lang_info['data_files']['footnotes'].length; i++) {
 					const footnote = await getJson(lang_info['data_dir_url'] + lang_info['data_files']['footnotes'][i]);
 					if (typeof footnote[getNextPageNum(pageNum, k)] != 'undefined') {
