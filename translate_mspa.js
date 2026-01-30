@@ -705,7 +705,7 @@ function redirectPage() {	// if on specific page redirect to another
 			window.location.replace("/read/2/000136");
 			break;
 		case "/read/1":
-			window.location.replace("/read/2/000002");
+			window.location.replace("/read/1/000002");
 			break;
 		case "/sbahj":
 			window.location.replace("/sbahj/1");
