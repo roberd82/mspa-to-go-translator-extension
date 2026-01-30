@@ -54,7 +54,9 @@ async function doTheTranslateyThing(item) {
 			for (let i = 0; i < newElements.length; i++) {
 				for (let j = 0; j < docElements.length; j++) {
 					if (newElements[i].getAttribute("for") == docElements[j].getAttribute("for")) {
+						//replace labels
 						docElements[j].innerHTML = newElements[i].innerHTML;
+						// replace spans
 						if (docElements[j].nextElementSibling.id == "font-size-value") {
 							docElements[j].nextElementSibling.nextElementSibling.nextElementSibling.innerHTML = newElements[i].nextElementSibling.nextElementSibling.nextElementSibling.innerHTML;
 						} else {
@@ -66,11 +68,13 @@ async function doTheTranslateyThing(item) {
 			}
 		} else if (lang_info['replace_page_content'][replacePage][0] == "/news") {
 			document.getElementById("news-title").firstElementChild.setAttribute("alt", lang_info['replace_page_content'][replacePage][1]);
+			
 			var newHtml = await parseDomFromFile(lang_info['replace_pages_url'] + "/" + lang_info['replace_page_content'][replacePage][2]);
 			newHtml = newHtml.getElementById("news-content");
 			document.getElementById("news-content").innerHTML = newHtml.innerHTML;
 		} else {	// then the ones thats just replace the content of the innerHtml
 			document.getElementById("title").innerHTML = lang_info['replace_page_content'][replacePage][1];
+			
 			replaceElementFromHtml("content", lang_info['replace_pages_url']+ "/" + lang_info['replace_page_content'][replacePage][2]);
 		}
 		reloadAllScripts();
@@ -130,7 +134,7 @@ async function doTheTranslateyThing(item) {
 
 			// all these loops are needed because of Act 6 Act 5 Act 1 x2
 
-			// replace gifs and flashes (and openbound someday)
+			// replace gifs (the first loop and allSrcs could probably be elimnated, but then it doesn't work for some reason, so I'm keeping it like this)
 			const medias = document.querySelectorAll("[id='media']");
 			let allSrcs = [];
 			for (let i = 0; i < medias.length; i++) {
@@ -147,11 +151,12 @@ async function doTheTranslateyThing(item) {
 				}
 				allSrcs.push(srcs);
 			}
+			// replace flashes
 			const flashes = document.getElementsByTagName("ruffle-embed");
 			if (flashes.length > 0) {
 				for (let i = 0; i < flashes.length; i++) {
 					const newSrc = lang_info['assets_dir_url'] + flashes[i].getAttribute("src").substring(6);
-					// check if exists
+					// check if exists (from some reason this works without CORS issues, but images don't)
 					fetch(newSrc, { method: 'HEAD' })
 					.then(response => {
 						if (response.ok) {
@@ -165,6 +170,7 @@ async function doTheTranslateyThing(item) {
 					});
 				}
 			}
+			// todo: opendbound
 
 			// replace commands, only works with mspa page numbers
 			const commandses = document.getElementsByClassName("commands");
@@ -189,7 +195,7 @@ async function doTheTranslateyThing(item) {
 				document.title = mspa_data[pageNum]['title'] + " - MSPA To Go";
 				const titles = document.querySelectorAll("[id='title']");
 				for (let i = 0; i < titles.length; i++) {
-					titles[i].innerHTML = mspa_data[getNextPageNum(pageNum, i)]['title'];
+					titles[i].innerHTML = mspa_data[getPageNumOffset(pageNum, i)]['title'];
 				}
 			} catch (error) {
 				// continue
@@ -200,7 +206,7 @@ async function doTheTranslateyThing(item) {
 				let allTextSrcs = [];
 				let allTextHrefs = [];
 				for (let i = 0; i < texts.length; i++) {
-					texts[i].innerHTML = mspa_data[getNextPageNum(pageNum, i)]['content']/*.replaceAll("|PESTERLOG|", "")*/;
+					texts[i].innerHTML = mspa_data[getPageNumOffset(pageNum, i)]['content'].replaceAll("|PESTERLOG|", "").replaceAll("|SPRITELOG|", "").replaceAll("|RECAP LOG|", "").replaceAll("|JOURNALOG|", "").replaceAll("|DIALOGLOG|", "").replaceAll("|SRIOUSBIZ|", "").replaceAll("|TRKSTRLOG|", "");
 
 					const links = texts[i].getElementsByTagName("a");
 					let hrefs = [];
@@ -277,16 +283,16 @@ async function doTheTranslateyThing(item) {
 			for (let k = 0; k < pages.length; k++) {		// this loop is needed for Act 6 Act 5 Act 1 x2
 				for (let i = 0; i < lang_info['data_files']['footnotes'].length; i++) {
 					const footnote = await getJson(lang_info['data_dir_url'] + lang_info['data_files']['footnotes'][i]);
-					if (typeof footnote[getNextPageNum(pageNum, k)] != 'undefined') {
-						for (let j = 0; j < footnote[getNextPageNum(pageNum, k)].length; j++) {
+					if (typeof footnote[getPageNumOffset(pageNum, k)] != 'undefined') {
+						for (let j = 0; j < footnote[getPageNumOffset(pageNum, k)].length; j++) {
 							const note = document.createElement("div");
-							note.innerHTML = footnote[getNextPageNum(pageNum, k)][j]['content'];
+							note.innerHTML = footnote[getPageNumOffset(pageNum, k)][j]['content'];
 							note.id = "content";
 							note.className = "comic-text";
 
-							if (footnote[getNextPageNum(pageNum, k)][j]['author'] != 'undefined') {
+							if (footnote[getPageNumOffset(pageNum, k)][j]['author'] != 'undefined') {
 								const author = document.createElement("span");
-								author.innerHTML = footnote[getNextPageNum(pageNum, k)][j]['author'];
+								author.innerHTML = footnote[getPageNumOffset(pageNum, k)][j]['author'];
 								author.setAttribute("style", "font-weight: 300;font-size: 10px;font-family: Verdana,Arial,Helvetica,sans-serif;display: flex;justify-content: flex-end;position: relative;top: 12px;margin-top: -12px;color: #979797;");
 								// style from uhc
 								note.appendChild(author);
@@ -352,6 +358,7 @@ async function doTheTranslateyThing(item) {
 
 	// things for every page
 
+	// filter web images
 	const allImgs = document.getElementsByTagName("img");
 	let webImgs = [];
 	for (let l = 0; l < allImgs.length; l++) {
@@ -359,6 +366,7 @@ async function doTheTranslateyThing(item) {
 			webImgs.push(allImgs[l]);
 		}
 	}
+	// then replace them
 	let webSrcs = [];
 	for (let l = 0; l < webImgs.length; l++) {	// search for translated web assets
 		webSrcs.push(webImgs[l].getAttribute("src"));
@@ -591,10 +599,10 @@ async function doTheTranslateyThing(item) {
 			}
 			allSrcs.push(srcs);
 		}	
-	} else if (window.location.pathname.includes("/archive")) {
+	} else if (window.location.pathname.includes("/archive")) {	// insert progress tracker to archive page
 		const progress = document.createElement("div");
 		progress.style = "text-align: center;";
-		progress.innerHTML = lang_info['progress_text'].replaceAll("999999", parseInt(getNextPageNum(lang_info['hs_progress'], -1900))).replaceAll("000000", parseInt(getNextPageNum(lang_info['ps_progress'], -218)));
+		progress.innerHTML = lang_info['progress_text'].replaceAll("999999", parseInt(getPageNumOffset(lang_info['hs_progress'], -1900))).replaceAll("000000", parseInt(getPageNumOffset(lang_info['ps_progress'], -218)));
 
 		var newHtml = await parseDomFromFile(lang_info['replace_pages_url'] + "/" + lang_info['replace_page_footer']);
 		progress.appendChild(document.createElement("br"));
@@ -605,8 +613,6 @@ async function doTheTranslateyThing(item) {
 		progress.appendChild(loadGame);
 
 		document.getElementById("content").parentNode.insertBefore(progress, document.getElementById("content"));
-
-
 	}
 
 	// replace menu-bar
@@ -649,16 +655,20 @@ function onError(error) {	// print an error to console
 }
 
 async function getJson(url) {	// read a json file to an object
-	return await (await fetch(url)).json();
+	try {
+		return await (await fetch(url)).json();
+	} catch (error) {
+		console.error("Failed to fetch file at " + url)
+	}
 }
 
-function getNextPageNum(pageNum, i) {	// get page number + i
-	var pageNumNum = parseInt(pageNum) + i;
-	pageNumNum = pageNumNum.toString();
-	if (pageNumNum.length < pageNum.length) {
-		pageNumNum = "0".repeat(pageNum.length-pageNumNum.length) + pageNumNum;
+function getPageNumOffset(pageNum, offset) {	// get page number with an offset
+	var newPageNum = parseInt(pageNum) + offset;
+	newPageNum = newPageNum.toString();
+	if (newPageNum.length < pageNum.length) {
+		newPageNum = "0".repeat(pageNum.length-newPageNum.length) + newPageNum;
 	}
-	return pageNumNum;
+	return newPageNum;
 }
 
 function reloadAllScripts() {	// in case an overridden page has new scripts that need to execute
@@ -715,13 +725,13 @@ function redirectPage() {	// if on specific page redirect to another
 	}
 }
 
-async function parseDomFromFile(url) {
+async function parseDomFromFile(url) {	// get a html file from an url and return it parsed
 	try {
 		var newHtml = await fetch(url);
 		newHtml = await newHtml.text();
 		const parser = new DOMParser();
 		return parser.parseFromString(newHtml, 'text/html');
 	} catch (error) {
-		onError(error);
+		console.error("Failed to parse the DOM of " + url);
 	}
 }
