@@ -207,7 +207,9 @@ async function doTheTranslateyThing(item) {
 				let allTextHrefs = [];
 				for (let i = 0; i < texts.length; i++) {
 					texts[i].innerHTML = mspa_data[getPageNumOffset(pageNum, i)]['content'].replaceAll("|PESTERLOG|", "").replaceAll("|SPRITELOG|", "").replaceAll("|RECAP LOG|", "").replaceAll("|JOURNALOG|", "").replaceAll("|DIALOGLOG|", "").replaceAll("|SRIOUSBIZ|", "").replaceAll("|TRKSTRLOG|", "");
-					texts[i].firstElementChild.remove();
+					if (texts[i].firstElementChild.tagName === 'BR') {
+						texts[i].firstElementChild.remove();
+					}
 
 					const links = texts[i].getElementsByTagName("a");
 					let hrefs = [];
