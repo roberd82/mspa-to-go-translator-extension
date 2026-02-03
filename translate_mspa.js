@@ -191,14 +191,11 @@ async function doTheTranslateyThing(item) {
 				}
 			}
 
-			try {	// replace titles (I don't remember why I put this in a trycatch block)
-				document.title = mspa_data[pageNum]['title'] + " - MSPA To Go";
-				const titles = document.querySelectorAll("[id='title']");
-				for (let i = 0; i < titles.length; i++) {
-					titles[i].innerHTML = mspa_data[getPageNumOffset(pageNum, i)]['title'];
-				}
-			} catch (error) {
-				// continue
+			// replace titles
+			document.title = mspa_data[pageNum]['title'] + " - MSPA To Go";
+			const titles = document.querySelectorAll("[id='title']");
+			for (let i = 0; i < titles.length; i++) {
+				titles[i].innerHTML = mspa_data[getPageNumOffset(pageNum, i)]['title'];
 			}
 
 			try {	// replace text and fix imported images and links
@@ -667,6 +664,9 @@ async function getJson(url) {	// read a json file to an object
 
 function getPageNumOffset(pageNum, offset) {	// get page number with an offset
 	var newPageNum = parseInt(pageNum) + offset;
+	if (newPageNum.toString().includes("NaN")) {
+		return pageNum;
+	}
 	newPageNum = newPageNum.toString();
 	if (newPageNum.length < pageNum.length) {
 		newPageNum = "0".repeat(pageNum.length-newPageNum.length) + newPageNum;
