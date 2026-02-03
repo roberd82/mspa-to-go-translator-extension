@@ -243,12 +243,13 @@ async function doTheTranslateyThing(item) {
 						}
 						// going around CORS to check if linked asset has translated version
 						if (links[j].getAttribute("href").includes("/mspa/")) {
-							hrefs.push(links[j].getAttribute("href").substring(6));
+							console.log(links[j].getAttribute("href"))
+							hrefs.push(links[j].getAttribute("href"));
 							const poorMansFetch = document.createElement("img");
-							poorMansFetch.src = lang_info['assets_dir_url'] + hrefs[j];
+							poorMansFetch.src = lang_info['assets_dir_url'] + hrefs[j].substring(6);
 							poorMansFetch.onerror = function () {
 								//poorMansFetch.src = "/mspa/" + allTextHrefs[i][j];
-								links[j].setAttribute("href", "/mspa/" + allTextHrefs[i][j]);
+								links[j].setAttribute("href", allTextHrefs[i][j]);
 							}
 							document.body.appendChild(poorMansFetch);
 							poorMansFetch.style.display = 'none';
