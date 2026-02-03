@@ -191,11 +191,14 @@ async function doTheTranslateyThing(item) {
 				}
 			}
 
-			// replace titles
-			document.title = mspa_data[pageNum]['title'] + " - MSPA To Go";
-			const titles = document.querySelectorAll("[id='title']");
-			for (let i = 0; i < titles.length; i++) {
-				titles[i].innerHTML = mspa_data[getPageNumOffset(pageNum, i)]['title'];
+			try {	// replace titles
+				document.title = mspa_data[pageNum]['title'] + " - MSPA To Go";
+				const titles = document.querySelectorAll("[id='title']");
+				for (let i = 0; i < titles.length; i++) {
+					titles[i].innerHTML = mspa_data[getPageNumOffset(pageNum, i)]['title'];
+				}
+			} catch (error) {
+				// continue
 			}
 
 			try {	// replace text and fix imported images and links
