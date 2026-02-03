@@ -207,7 +207,7 @@ async function doTheTranslateyThing(item) {
 				let allTextHrefs = [];
 				for (let i = 0; i < texts.length; i++) {
 					texts[i].innerHTML = mspa_data[getPageNumOffset(pageNum, i)]['content'].replaceAll("|PESTERLOG|", "").replaceAll("|SPRITELOG|", "").replaceAll("|RECAP LOG|", "").replaceAll("|JOURNALOG|", "").replaceAll("|DIALOGLOG|", "").replaceAll("|SRIOUSBIZ|", "").replaceAll("|TRKSTRLOG|", "");
-					if (texts[i].firstElementChild.tagName === 'BR') {
+					if (texts[i].className.includes("log-content") && texts[i].firstElementChild.tagName === 'BR') {
 						texts[i].firstElementChild.remove();
 					}
 
