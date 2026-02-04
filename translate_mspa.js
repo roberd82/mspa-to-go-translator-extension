@@ -91,17 +91,16 @@ async function doTheTranslateyThing(item) {
 			const imgs = document.getElementsByTagName("img");
 			let srcs = [];
 			for (let i = 0; i < imgs.length; i++) {
+				srcs.push(imgs[i].getAttribute("src"));
 				if (imgs[i].getAttribute("src").includes("/assets/img/sbahj/")) {	// page assets
-					srcs.push(imgs[i].getAttribute("src"));
 					imgs[i].src = lang_info['assets_dir_url'] + srcs[i].replace("/assets/img/sbahj/", "sweetbroandhellajeff/");
 					imgs[i].onerror = function() {
 						imgs[i].src = srcs[i];
 					}
 				} else {	// comic pages
-					srcs.push(imgs[i].getAttribute("src").substring(6));
-					imgs[i].src = lang_info['assets_dir_url'] + srcs[i];
+					imgs[i].src = lang_info['assets_dir_url'] + srcs[i].substring(6);
 					imgs[i].onerror = function() {
-						imgs[i].src = "/mspa/" + srcs[i];
+						imgs[i].src = srcs[i];
 					}
 				}
 			}
@@ -110,7 +109,7 @@ async function doTheTranslateyThing(item) {
 			const comic_list_links = document.getElementById("comic-list").getElementsByTagName("a");
 			for (let i = 0; i < comic_list_links.length; i++) {
 				for (let j = 0; j < sbahj_comic_list['listedPages'].length; j++) {
-					if (comic_list_links[i].getAttribute("href") == sbahj_comic_list['listedPages'][j]['url']) {
+					if (comic_list_links[i].getAttribute("href") == sbahj_comic_list['listedPages'][j]['url'] || (comic_list_links[i].getAttribute("href") == "/SBAHJthemovie1" && sbahj_comic_list['listedPages'][j]['url'] == "/sweetbroandhellajeff/movies/SBAHJthemovie1.swf")) {
 						comic_list_links[i].innerHTML = sbahj_comic_list['listedPages'][j]['title'];
 						break;
 					}
@@ -142,10 +141,10 @@ async function doTheTranslateyThing(item) {
 				let srcs = [];
 				if (imgs.length > 0) {
 					for (let j = 0; j < imgs.length; j++) {
-						srcs.push(imgs[j].getAttribute("src").substring(6));
-						imgs[j].src = lang_info['assets_dir_url'] + srcs[j];
+						srcs.push(imgs[j].getAttribute("src"));
+						imgs[j].src = lang_info['assets_dir_url'] + srcs[j].substring(6);
 						imgs[j].onerror = function() {
-							imgs[j].src = "/mspa/" + allSrcs[i][j];
+							imgs[j].src = allSrcs[i][j];
 						}
 					}
 				}
@@ -242,13 +241,12 @@ async function doTheTranslateyThing(item) {
 							links[j].href = lang_info['external_links'][split[split.length-1]];
 						}
 						// going around CORS to check if linked asset has translated version
+						hrefs.push(links[j].getAttribute("href"));
 						if (links[j].getAttribute("href").includes("/mspa/")) {
-							console.log(links[j].getAttribute("href"))
-							hrefs.push(links[j].getAttribute("href"));
 							const poorMansFetch = document.createElement("img");
 							poorMansFetch.src = lang_info['assets_dir_url'] + hrefs[j].substring(6);
 							poorMansFetch.onerror = function () {
-								//poorMansFetch.src = "/mspa/" + allTextHrefs[i][j];
+								//poorMansFetch.src = allTextHrefs[i][j];	// I forgot why I left this here
 								links[j].setAttribute("href", allTextHrefs[i][j]);
 							}
 							document.body.appendChild(poorMansFetch);
@@ -268,11 +266,11 @@ async function doTheTranslateyThing(item) {
 							imgs[j].setAttribute("src", imgs[j].getAttribute("src").replaceAll("http://mspaintadventures.com/", "/mspa/"));
 						}
 						// then check if there is a translated version
+						srcs.push(imgs[j].getAttribute("src"));
 						if (imgs[j].getAttribute("src").includes("/mspa/")) {
-							srcs.push(imgs[j].getAttribute("src").substring(6));
-							imgs[j].src = lang_info['assets_dir_url'] + srcs[j];
+							imgs[j].src = lang_info['assets_dir_url'] + srcs[j].substring(6);
 							imgs[j].onerror = function() {
-								imgs[j].src = "/mspa/" + allTextSrcs[i][j];
+								imgs[j].src = allTextSrcs[i][j];
 							}
 						}
 					}
@@ -467,7 +465,6 @@ async function doTheTranslateyThing(item) {
 		} else {
 			map.src = lang_info['assets_dir_url'] + mapSrc.replaceAll("04.gif", "04_01.gif");
 		}
-		console.log(map.src)
 		map.onerror = function() {
 			map.src = "/mspa/" + mapSrc;
 		}
@@ -555,7 +552,7 @@ async function doTheTranslateyThing(item) {
 			const imgs = tableCols[j].getElementsByTagName("img");
 			let srcs = [];
 				for (let i = 0; i < imgs.length; i++) {
-				srcs.push(imgs[i].getAttribute("src").substring(6));
+				srcs.push(imgs[i].getAttribute("src"));
 				if (
 					(srcs[i].includes("map_06_01.gif") ||
 					srcs[i].includes("map_06_02.gif") ||
@@ -595,9 +592,9 @@ async function doTheTranslateyThing(item) {
 					srcs[i].includes("map_splitA6.gif") ||
 					srcs[i].includes("map_splitA6_6.gif")) || j != 2
 				) {		// only check for images with text on them for performance
-					imgs[i].src = lang_info["assets_dir_url"] + srcs[i];
+					imgs[i].src = lang_info["assets_dir_url"] + srcs[i].substring(6);
 					imgs[i].onerror = function() {
-						imgs[i].src = "/mspa/" + allSrcs[j][i];
+						imgs[i].src = allSrcs[j][i];
 					}
 				}
 			}
