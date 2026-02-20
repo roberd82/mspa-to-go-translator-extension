@@ -38,9 +38,9 @@ The Data folder should have your .json files with the translated text in this fo
     }
 }
 ```
-The originals can be found in the Asset Pack's `/archive/data` folder. The `mspa.json` file has more json objects, that just the mspa pages text, those should be moved in different .json files and the main text should be elevated from the "story" object into the root of the json.
+The originals can be found in the Asset Pack's `/archive/data` folder. The `mspa.json` file has more json objects that's just the mspa pages text, those should be moved in different .json files and the main text should be elevated from the "story" object into the root of the json.
 
-The public folder should contain .html files, that contain content, that will be replaced on the site.
+The public folder should contain .html files that contain content that will be replaced on the site.
 
 ## `lang_info` values explained
 (Page number always refers to the MSPA page numbers, the Viz numbering is not supported and the extension disables it completely)
@@ -66,14 +66,14 @@ The public folder should contain .html files, that contain content, that will be
   }
   ```
   - "footnotes": array of all your footnote files
-- "external_links": links to every file from `/archive/external/` in the Asset Pack
+- "external_links": links to every file from `/archive/external/` in the Asset Pack (if you don't have translated version then look for links on MSPAToGo or homestuck.com)
 - "replace_pages_url": the folder with .html files that contain content to be replaced
 - "replace_menu_bar": the `<button id="menu-button">` element's outerHtml on the first line, then the menu-bars's links in order
 - "replace_menu_bar-caliborn": same as the previous, just the Caliborn version
 - "replace_footer": the `<div id="footer">` element's innerHtml
 - "replace_page_footer": all the links in the `<div id="page-footer">` element
 - "replace_page_content": pages that need to have the innerHtml of their `content` id div replaced
-  - first element: the path wich to replace on
+  - first element: the path which to replace on
   - second element: the page title
   - thir element: the path to the .html file relative to "replace_pages_url"
   - there are three exceptions that work differently: the root `/`, `/options` and `/news`
